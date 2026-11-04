@@ -1,3 +1,8 @@
+> **RF1000 und RF2000:** Dieses Repo ist das offizielle Klipper mit zusätzlichen Modulen für den Renkforce RF1000 und RF2000.
+>
+> - [Klipper auf dieses Repo umstellen](KLIPPER_WECHSELN.md)
+> - [Firmware Updater für Mainsail](FIRMWARE_UPDATER.md)
+
 Welcome to the Klipper project!
 
 [![Klipper](docs/img/klipper-logo-small.png)](https://www.klipper3d.org/)
