@@ -10,8 +10,10 @@ Mit dem Modul `z_jog` fährst du die Z-Achse mit den Tasten **Z-UP** und **Z-DN*
 
 **Z-DN** erhöht Z und **Z-UP** verringert Z.
 
-> [!WARNING]
-> Das Fahren beim Halten ist noch nicht am echten Drucker bestätigt. Teste es zuerst weit weg vom Bett und halte den Not-Halt bereit. Nahe am Bett nimmst du besser kurze Schritte.
+Am RF2000 getestet: kurze Schritte, Babystep sowie Fahren und Stoppen beim Halten.
+
+> [!NOTE]
+> Nahe am Bett nimmst du besser kurze Schritte.
 
 ## Sicherungen
 
