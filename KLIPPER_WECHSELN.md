@@ -4,12 +4,10 @@ Diese Anleitung stellt dein vorhandenes Klipper auf diesen Stand um. Er verbinde
 
 In Mainsail selbst gibt es dafür keine Einstellung. Du änderst die Quelle einmal im Terminal. Danach zeigt Mainsail im Update Manager automatisch dieses Repo an, an der `moonraker.conf` musst du nichts ändern.
 
-> [!WARNING]
-> Der Stand ist noch nicht im Druckbetrieb erprobt. Bisher geprüft wurde auf einem Drucker mit ATmega2560: Klipper startet, und die Wägezelle liefert Werte. Fahrten, Z-Referenzfahrt und Druck sind noch nicht bestätigt. Bleib bei den ersten Tests am Drucker und halte den Not-Halt bereit.
+Getestet auf einem RF2000 mit ATmega2560: Z-Referenzfahrt, `PROBE`, `PROBE_ACCURACY`, `BED_MESH_CALIBRATE` und ein Testdruck.
 
-## Noch nicht am echten Drucker geprüft
-
-`PROBE`, `PROBE_ACCURACY` und `BED_MESH_CALIBRATE` mit dem `rf1000_load_cell_probe` wurden korrigiert, bisher aber nur mit simulierter Wägezelle getestet. Bleib beim ersten echten Lauf am Drucker und halte den Not-Halt bereit.
+> [!NOTE]
+> Bleib trotzdem bei deinen ersten Tests am Drucker und halte den Not-Halt bereit, denn dein Drucker kann anders eingestellt sein.
 
 ## Das brauchst du vorher
 
