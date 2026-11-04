@@ -11,8 +11,11 @@ Klipper supports the following standard G-Code commands:
 - Move to origin: `G28 [X] [Y] [Z]`
 - Turn off motors: `M18` or `M84`
 - Wait for current moves to finish: `M400`
-- Use absolute/relative distances for extrusion: `M82`, `M83`
 - Use absolute/relative coordinates: `G90`, `G91`
+- Force relative distances for extrusion: `M83`, `M82`
+  - Note: `M83` forces extrusions to use relative coordinates even if
+    `G90` absolute mode is selected. `M82` disables that forced mode
+    (it does not force the extruder to use absolute coordinates).
 - Set position: `G92 [X<pos>] [Y<pos>] [Z<pos>] [E<pos>]`
 - Set speed factor override percentage: `M220 S<percent>`
 - Set extrude factor override percentage: `M221 S<percent>`
@@ -154,7 +157,8 @@ The following commands are available when the
 section](Config_Reference.md#axis_twist_compensation) is enabled.
 
 #### AXIS_TWIST_COMPENSATION_CALIBRATE
-`AXIS_TWIST_COMPENSATION_CALIBRATE [AXIS=<X|Y>] [SAMPLE_COUNT=<value>]`
+`AXIS_TWIST_COMPENSATION_CALIBRATE [AXIS=<X|Y>] [SAMPLE_COUNT=<value>]
+[MANUAL_METHOD=manual]`
 
 Calibrates axis twist compensation by specifying the target axis or
 enabling automatic calibration.
@@ -715,12 +719,12 @@ specified G-Code speed.
 `SAVE_GCODE_STATE [NAME=<state_name>]`: Save the current g-code
 coordinate parsing state. Saving and restoring the g-code state is
 useful in scripts and macros. This command saves the current g-code
-absolute coordinate mode (G90/G91), absolute extrude mode (M82/M83),
-origin (G92), offset (SET_GCODE_OFFSET), speed override (M220),
-extruder override (M221), move speed, current XYZ position, and
-relative extruder "E" position. If NAME is provided it allows one to
-name the saved state to the given string. If NAME is not provided it
-defaults to "default".
+absolute coordinate mode (G90/G91), force relative extrude mode
+(M83/M82), origin (G92), offset (SET_GCODE_OFFSET), speed override
+(M220), extruder override (M221), move speed, current XYZ position,
+and relative extruder "E" position. If NAME is provided it allows one
+to name the saved state to the given string. If NAME is not provided
+it defaults to "default".
 
 #### RESTORE_GCODE_STATE
 `RESTORE_GCODE_STATE [NAME=<state_name>] [MOVE=1
@@ -780,19 +784,22 @@ is enabled (also see [TSLl401CL Filament Width Sensor](TSL1401CL_Filament_Width_
 and [Hall Filament Width Sensor](Hall_Filament_Width_Sensor.md)):
 
 #### QUERY_FILAMENT_WIDTH
-`QUERY_FILAMENT_WIDTH`: Return the current measured filament width.
+`QUERY_FILAMENT_WIDTH`: Return the current measured filament width, the
+state of the width sensor, the state of the filament sensor and the state
+of flow compensation.
 
 #### RESET_FILAMENT_WIDTH_SENSOR
 `RESET_FILAMENT_WIDTH_SENSOR`: Clear all sensor readings. Helpful
-after filament change.
+after filament change. Resets flow rate to 100%.
 
 #### DISABLE_FILAMENT_WIDTH_SENSOR
 `DISABLE_FILAMENT_WIDTH_SENSOR`: Turn off the filament width sensor
-and stop using it for flow control.
+and stop using it for flow compensation. Resets flow rate to 100%.
 
 #### ENABLE_FILAMENT_WIDTH_SENSOR
-`ENABLE_FILAMENT_WIDTH_SENSOR`: Turn on the filament width sensor and
-start using it for flow control.
+`ENABLE_FILAMENT_WIDTH_SENSOR [FLOW_COMPENSATION=[0|1]`: Turn on the filament
+width sensor and enable or disable flow compensation. If `FLOW_COMPENSATION`
+is not specified, the current flow compensation state is preserved.
 
 #### QUERY_RAW_FILAMENT_WIDTH
 `QUERY_RAW_FILAMENT_WIDTH`: Return the current ADC channel readings
@@ -1251,12 +1258,27 @@ additional parameters if a `[probe_eddy_current]` section is defined:
   specified in the `[probe_eddy_current]` config section when probing
   using `METHOD=tap`.
 
+The `Z_OFFSET_APPLY_PROBE` command is also extended to support a
+`METHOD=tap` parameter. When no METHOD parameter is provided, the
+`Z_OFFSET_APPLY_PROBE` command alters the probe calibration to apply
+the current Z G-Code offset to future `scan`, `rapid_scan`, and
+default probes. If `METHOD=tap` is specified then the command instead
+applies the change to `tap_z_offset` so that future `tap` probes are
+updated to use the current Z G-Code offset.
+
 #### PROBE_EDDY_CURRENT_CALIBRATE
-`PROBE_EDDY_CURRENT_CALIBRATE CHIP=<config_name>`: This starts a tool
+`PROBE_EDDY_CURRENT_CALIBRATE CHIP=<config_name> [MANUAL_METHOD=manual]`:
+This starts a tool
 that calibrates the sensor resonance frequencies to corresponding Z
 heights. The tool will take a couple of minutes to complete. After
 completion, use the SAVE_CONFIG command to store the results in the
 printer.cfg file.
+
+#### PROBE_EDDY_CURRENT_TAP_CALIBRATE
+`PROBE_EDDY_CURRENT_TAP_CALIBRATE [TAP=guess|refine|verify]`: This
+starts a tool that can calibrate the probe's "tap_threshold"
+parameter. See the
+[eddy probe documentation](Eddy_Probe.md#tap-calibration) for details.
 
 #### LDC_CALIBRATE_DRIVE_CURRENT
 `LDC_CALIBRATE_DRIVE_CURRENT CHIP=<config_name>` This tool will
@@ -1617,13 +1639,15 @@ The following commands are available when a
 is enabled.
 
 #### TEMPERATURE_PROBE_CALIBRATE
-`TEMPERATURE_PROBE_CALIBRATE [PROBE=<probe name>] [TARGET=<value>] [STEP=<value>]`:
+`TEMPERATURE_PROBE_CALIBRATE [PROBE=<probe name>] [TARGET=<value>] [STEP=<value>]
+[MANUAL_METHOD=<method>]`:
 Initiates probe drift calibration for eddy current based probes.  The `TARGET`
 is a target temperature for the last sample.  When the temperature recorded
 during a sample exceeds the `TARGET` calibration will complete.  The `STEP`
 parameter sets temperature delta (in C) between samples. After a sample has
 been taken, this delta is used to schedule a call to `TEMPERATURE_PROBE_NEXT`.
-The default `STEP` is 2.
+The default `STEP` is 2. The `METHOD` only supports `tap` as an option,
+if specified, probing will be automated.
 
 #### TEMPERATURE_PROBE_NEXT
 `TEMPERATURE_PROBE_NEXT`: After calibration has started this command is run to

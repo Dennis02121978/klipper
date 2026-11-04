@@ -14,17 +14,23 @@ ConfigSubscriptions = [
     # (cfgtype, capture_name, api_request, request_params)
     ('adxl345', 'accelerometer:{csn}', '{ct}/dump_{ct}', {'sensor': '{csn}'}),
     ('lis2dw', 'accelerometer:{csn}', '{ct}/dump_{ct}', {'sensor': '{csn}'}),
+    ('lis3dh', 'accelerometer:{csn}', 'lis2dw/dump_lis2dw', {'sensor':'{csn}'}),
     ('mpu9250', 'accelerometer:{csn}', '{ct}/dump_{ct}', {'sensor': '{csn}'}),
     ('bmi160', 'accelerometer:{csn}', '{ct}/dump_{ct}', {'sensor': '{csn}'}),
     ('icm20948', 'accelerometer:{csn}', '{ct}/dump_{ct}', {'sensor': '{csn}'}),
     ('angle', '{ct}:{csn}', '{ct}/dump_{ct}', {'sensor': '{csn}'}),
     ('probe_eddy_current', 'ldc1612:{csn}', 'ldc1612/dump_ldc1612',
      {'sensor': '{csn}'}),
+    ('load_cell', 'loadcell:{csn}', 'load_cell/dump_force',
+      {'load_cell': '{csn}'}),
+    ('load_cell_probe', 'loadcell:{csn}', 'load_cell/dump_force',
+      {'load_cell': '{csn}'}),
     ('tmc2130', 'stallguard:{csn}', 'tmc/stallguard_dump', {'name': '{csn}'}),
     ('tmc2209', 'stallguard:{csn}', 'tmc/stallguard_dump', {'name': '{csn}'}),
     ('tmc2260', 'stallguard:{csn}', 'tmc/stallguard_dump', {'name': '{csn}'}),
     ('tmc2240', 'stallguard:{csn}', 'tmc/stallguard_dump', {'name': '{csn}'}),
     ('tmc5160', 'stallguard:{csn}', 'tmc/stallguard_dump', {'name': '{csn}'}),
+    ('tmc5262', 'stallguard:{csn}', 'tmc/stallguard_dump', {'name': '{csn}'}),
 ]
 
 def webhook_socket_create(uds_filename):
