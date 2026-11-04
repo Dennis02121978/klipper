@@ -22,7 +22,7 @@ In Mainsail selbst gibt es dafür keine Einstellung. Du änderst die Quelle einm
 
 Öffne ein Terminal: Unter Windows die **PowerShell**, auf dem Mac das Programm **Terminal**.
 
-Gib diesen Befehl ein und ersetze Benutzer und IP-Adresse durch deine eigenen. Die IP-Adresse steht oben im Browser, wenn du Mainsail öffnest. Der Benutzer ist oft `pi` oder bei MKS-Boards `mks`.
+Gib diesen Befehl ein und ersetze Benutzer und IP-Adresse durch deine eigenen. Die IP-Adresse steht oben im Browser, wenn du Mainsail öffnest. Der Benutzer ist oft `pi`.
 
 ```bash
 ssh pi@192.168.1.50
@@ -69,7 +69,7 @@ In der ersten Zeile muss `Dennis02121978/klipper` stehen, die Version beginnt mi
 
 Code auf dem Pi und Firmware auf dem Board müssen zusammenpassen. Bis zu diesem Schritt kann Klipper deshalb einen Fehler melden, das ist normal.
 
-Installiere dafür den passenden Firmware Updater und starte das Update: [Anleitung für den Firmware Updater](FIRMWARE_UPDATER.md).
+Installiere dafür den Firmware Updater und starte das Update: [Anleitung für den Firmware Updater](FIRMWARE_UPDATER.md).
 
 ## Schritt 5: Config prüfen
 
