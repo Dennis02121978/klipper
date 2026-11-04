@@ -7,9 +7,9 @@ In Mainsail selbst gibt es dafür keine Einstellung. Du änderst die Quelle einm
 > [!WARNING]
 > Der Stand ist noch nicht im Druckbetrieb erprobt. Bisher geprüft wurde auf einem Drucker mit ATmega2560: Klipper startet, und die Wägezelle liefert Werte. Fahrten, Z-Referenzfahrt und Druck sind noch nicht bestätigt. Bleib bei den ersten Tests am Drucker und halte den Not-Halt bereit.
 
-## Bekanntes Problem
+## Noch nicht am echten Drucker geprüft
 
-`BED_MESH_CALIBRATE` bricht mit dem Probe `rf1000_load_cell_probe` im Testlauf mit einem Fehler ab: `get_offsets() takes 1 positional argument`. Der Fehler steckt schon im älteren RF1000-Stand. Führe den Befehl vorerst nicht aus.
+`PROBE`, `PROBE_ACCURACY` und `BED_MESH_CALIBRATE` mit dem `rf1000_load_cell_probe` wurden korrigiert, bisher aber nur mit simulierter Wägezelle getestet. Bleib beim ersten echten Lauf am Drucker und halte den Not-Halt bereit.
 
 ## Das brauchst du vorher
 
@@ -101,6 +101,7 @@ Nimm für Updates am besten den [Firmware Updater](FIRMWARE_UPDATER.md), denn er
 |---|---|
 | `Your local changes … would be overwritten` | Im Klipper-Ordner gibt es eigene Änderungen. Siehe Schritt 2. |
 | `MCU Protocol error` oder eine Meldung, dass die Firmware nicht passt | Die Firmware wurde noch nicht geschrieben. Siehe Schritt 4. |
+| `has no attribute 'load_cell_probe'` im Klipper-Log | In deiner Config steht noch der alte Name. Ersetze `printer["load_cell_probe"]` durch `printer["rf1000_load_cell_probe"]`. |
 | `Unknown config object` | Deine `printer.cfg` nutzt einen Abschnitt, den es so nicht mehr gibt. Vergleiche sie mit den Beispielen aus Schritt 5. |
 | `ModuleNotFoundError` im Klipper-Log | Es fehlt ein Python-Paket. Gib `~/klippy-env/bin/pip install -r ~/klipper/scripts/klippy-requirements.txt` ein und starte Klipper mit `sudo systemctl restart klipper` neu. |
 

@@ -6,6 +6,7 @@
 # This file may be distributed under the terms of the GNU GPLv3 license.
 
 import mathutil
+from . import manual_probe
 import sys
 import logging
 import random
@@ -205,7 +206,7 @@ class LoadCellProbe:
     def get_probe_params(self, gcmd=None):
         return self._params
 
-    def get_offsets(self):
+    def get_offsets(self, gcmd=None):
         return 0, 0, 0
 
     def multi_probe_begin(self):
@@ -255,8 +256,9 @@ class LoadCellProbe:
         gcmd.respond_info("FINISHED toolhead Z = %f" % result)
         pos[2] = result
         self._last_z_result = result
-        self._results.append(pos)
-        return self._results[-1]
+        self._results.append(manual_probe.ProbeResult(
+            pos[0], pos[1], pos[2], pos[0], pos[1], pos[2]))
+        return pos
 
     def pull_probed_results(self):
         return self._results
@@ -440,7 +442,7 @@ class LoadCellProbe:
 
     def _calc_median(self, positions):
         z_sorted = sorted(positions, key=(lambda p: p[2]))
-        middle = len(positions) / 2
+        middle = len(positions) // 2
         if (len(positions) & 1) == 1:
             # odd number of samples
             return z_sorted[middle]
@@ -448,7 +450,9 @@ class LoadCellProbe:
         return self._calc_mean(z_sorted[middle - 1 : middle + 1])
 
     def cmd_PROBE_ACCURACY(self, gcmd):
-        lift_speed = self.get_lift_speed(gcmd)
+        lift_speed = gcmd.get_float(
+            "LIFT_SPEED", self._params["lift_speed"], above=0.0
+        )
         sample_count = gcmd.get_int("SAMPLES", 10, minval=1)
         sample_retract_dist = gcmd.get_float("SAMPLE_RETRACT_DIST", 2.0, above=0.0)
 
