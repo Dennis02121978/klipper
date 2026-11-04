@@ -2,6 +2,7 @@
 >
 > - [Klipper auf dieses Repo umstellen](KLIPPER_WECHSELN.md)
 > - [Firmware Updater für Mainsail](FIRMWARE_UPDATER.md)
+> - [Z-Achse mit den Tasten am RF2000 fahren](Z_TASTEN.md)
 
 Welcome to the Klipper project!
 
