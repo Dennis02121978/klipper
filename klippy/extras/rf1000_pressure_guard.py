@@ -19,12 +19,43 @@ import logging
 FEED_RAMP_STEP = 0.01  # firmware changes the feed factor by 1% per update
 
 
+class ForceSensor:
+    """Sensor type "rf1000_force" for [temperature_sensor <name>]: shows the
+    load cell force as a curve in Mainsail/Fluidd (unit shown there: °C)."""
+
+    def __init__(self, config):
+        self.printer = config.get_printer()
+        self.reactor = self.printer.get_reactor()
+        self.probe_name = config.get("probe", "rf1000_load_cell_probe")
+        self.callback = None
+        self.printer.register_event_handler("klippy:ready", self._handle_ready)
+
+    def setup_minmax(self, min_temp, max_temp):
+        pass  # forces are not limited here, see rf1000_load_cell_probe
+
+    def setup_callback(self, cb):
+        self.callback = cb
+
+    def get_report_time_delta(self):
+        return 1.0
+
+    def _handle_ready(self):
+        probe = self.printer.lookup_object(self.probe_name)
+        probe.subscribe_force(self._on_force)
+
+    def _on_force(self, force):
+        if self.callback is not None:
+            self.callback(self.reactor.monotonic(), force)
+
+
 class PressureGuard:
     def __init__(self, config):
         self.printer = config.get_printer()
         self.reactor = self.printer.get_reactor()
         self.gcode = self.printer.lookup_object("gcode")
         self.printer.load_object(config, "gcode_move")
+        pheaters = self.printer.load_object(config, "heaters")
+        pheaters.add_sensor_factory("rf1000_force", ForceSensor)
         self.probe_name = config.get("probe", "rf1000_load_cell_probe")
 
         # Emergency pause (both 0 = disabled)

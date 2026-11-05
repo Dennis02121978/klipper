@@ -25,3 +25,19 @@ Befehle (nur bis zum Neustart gültig): `RF_EMERGENCY_PAUSE [MIN=] [MAX=]` (wie 
   Klipper-Pufferzeit verzögert. Ein `M220`/`M221` des Slicers bleibt erhalten.
 - Mit Mock-Tests geprüft; die Notfall-Pause und die Kompensation selbst sind noch nicht
   unter echter Last am Drucker getestet.
+
+## Live-Kurve "Digits" in Mainsail
+Das Modul registriert den Sensortyp `rf1000_force`. In `printer.cfg` **nach** `[rf1000_pressure_guard]`:
+
+```
+[temperature_sensor Digits]
+sensor_type: rf1000_force
+```
+
+Mainsail zeigt die Kraft im Temperatur-Diagramm. Die Einheit "°C" ist dort fest vorgegeben und
+gemeint ist die Kraft. Die Kurve wird etwa einmal pro Sekunde aktualisiert; die schnellen Werte
+liefert `LCP_READ`.
+
+## Nach Änderungen an Modulen
+Den ganzen Dienst neu starten: `sudo systemctl restart klipper`. Ein `RESTART` im Mainsail lädt
+bereits geladene Python-Module nicht neu, ein geändertes Modul wird dann nicht wirksam.
