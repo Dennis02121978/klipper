@@ -29,15 +29,15 @@ Beim Tippen des Passworts siehst du nichts, das ist normal.
 
 ```bash
 cd ~
-wget https://github.com/Dennis02121978/3D-Artmaker/releases/download/v1.3.0/rf-update_1.3.0_all.deb
-echo "f11f067108f872a8bc62e656afb3a80b8bf6dc39e4c388ff26fc799817ecb52c  rf-update_1.3.0_all.deb" | sha256sum -c
+wget https://github.com/Dennis02121978/3D-Artmaker/releases/download/v1.4.0/rf-update_1.4.0_all.deb
+echo "89ba07d7812a56c153ee18680bb51ea58c2963bf21e8edf7e9b31fbc167ff229  rf-update_1.4.0_all.deb" | sha256sum -c
 ```
 
 Am Ende muss `OK` stehen. Steht dort etwas anderes, installiere nicht weiter.
 
 ```bash
 sudo apt update
-sudo apt install ./rf-update_1.3.0_all.deb
+sudo apt install ./rf-update_1.4.0_all.deb
 ```
 
 Kommt eine Frage mit `J/n` oder `Y/n`, drücke `J` oder `Y` und dann Enter. Am Ende steht `Firmware-Update ist installiert`. Mainsail verliert dabei kurz die Verbindung, das ist normal.

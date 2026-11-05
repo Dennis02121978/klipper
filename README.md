@@ -3,6 +3,7 @@
 > - [Klipper auf dieses Repo umstellen](KLIPPER_WECHSELN.md)
 > - [Firmware Updater für Mainsail](FIRMWARE_UPDATER.md)
 > - [Z-Achse mit den Tasten am RF2000 fahren](Z_TASTEN.md)
+> - [BootScreen für den Raspberry Pi](BOOTSCREEN.md)
 
 Welcome to the Klipper project!
 
