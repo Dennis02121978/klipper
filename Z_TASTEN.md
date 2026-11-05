@@ -5,7 +5,7 @@ Mit dem Modul `z_jog` fährst du die Z-Achse mit den Tasten **Z-UP** und **Z-DN*
 | Bedienung | Was passiert |
 |---|---|
 | Kurz drücken | Z fährt 0,03 mm |
-| 2 Sekunden halten | Z fährt konstant mit 3 mm/s, bis du loslässt |
+| 2 Sekunden halten | Z fährt konstant mit 8 mm/s, bis du loslässt |
 | Drücken beim Drucken | Der Z-Offset ändert sich um 0,005 mm (Babystep), Halten fährt nicht |
 
 **Z-DN** erhöht Z und **Z-UP** verringert Z.
