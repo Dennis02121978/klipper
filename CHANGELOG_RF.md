@@ -15,6 +15,9 @@ in der `printer.cfg` eingetragen wird.
   bleibt erhalten, die Korrektur wird daraufmultipliziert. Befehl: `RF_FLOW_COMP`.
 - **Kurve "Digits"** in Mainsail: Neuer Sensortyp `rf1000_force` für `[temperature_sensor Digits]`.
   Mainsail zeigt die Einheit dort fest als "°C", gemeint ist die Kraft.
+- **Config Creator** (`RenkforceConfigCreator/index.html`): Seite im Browser, die `printer.cfg` und `macros.cfg` erzeugt, jetzt mit
+  Abschnitt für Notfall-Pause, Flow-Kompensation und Digits-Kurve sowie einer Anleitung zum Einstellen. Siehe
+  [RenkforceConfigCreator/README.md](RenkforceConfigCreator/README.md).
 - Beispiel-Konfigurationen `config/printer-rf1000.cfg` und `config/printer-rf2000v2-single.cfg`
   enthalten die neuen Abschnitte als auskommentierten Block.
 
