@@ -2,6 +2,7 @@
 >
 > - [Klipper auf dieses Repo umstellen](KLIPPER_WECHSELN.md)
 > - [Firmware Updater für Mainsail](FIRMWARE_UPDATER.md)
+> - [Änderungen für RF1000 und RF2000](CHANGELOG_RF.md)
 > - [Notfall-Pause und Flow-Kompensation](PRESSURE_GUARD.md)
 > - [Z-Achse mit den Tasten am RF2000 fahren](Z_TASTEN.md)
 > - [BootScreen für den Raspberry Pi](BOOTSCREEN.md)
