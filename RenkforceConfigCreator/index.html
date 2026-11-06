@@ -1492,9 +1492,10 @@ function buildOrca(s) {
   ];
   const table = '<table><tr><th>Einstellung (Drucker → Allgemein / Extruder)</th><th>Wert</th></tr>' +
     rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('') + '</table>';
-  const block = (title, code) => `<p><b>${title}</b></p><pre>${esc(code)}</pre>`;
+  const block = (title, code) => `<p><b>${title}</b></p><pre>${esc(code)}</pre><button type="button" class="act cp">Kopieren</button>`;
   return `<p>Orca-Profil für <b>${s.model}</b> (${s.dual ? 'Dual' : 'Single'} Extruder). Die Werte folgen deinen Eingaben auf den Seiten davor.</p>` +
     table +
+    (s.yfront > 0 ? block('Drucker → Grundlegende Daten → Druckbett-Form → Sperrbereich (Bed exclude area), zum Kopieren', `0x0,${fmt(s.xmax)}x0,${fmt(s.xmax)}x${fmt(s.yfront)},0x${fmt(s.yfront)}`) + '<p class="hint">Vier Eckpunkte des vorderen Streifens (Format XxY, durch Komma getrennt). Im Orca-Fenster „Druckbett-Form → Sperrbereich“ den Text ins Feld einfügen oder den Bereich mit dem Rechteck-Werkzeug zeichnen.</p>' : '') +
     block('Drucker → Maschinen-G-Code → Start-G-Code', startCode) +
     `<p class="hint">Der Start-G-Code ruft nur das Makro <code>PRINT_START</code> aus der <code>macros.cfg</code> auf. Es fährt Home, lädt das Mesh,
       heizt Bett und Düse auf die übergebenen Temperaturen und zieht die Prime Line.${s.dual ? ' Bei Dual heizt Orca die zweite Düse selbst, sobald sie gebraucht wird.' : ''}
@@ -1678,6 +1679,14 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
   document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
   render(true);
 }));
+// Kopieren-Knoepfe der Orca-Codebloecke
+$('orcaBody').addEventListener('click', async e => {
+  const b = e.target.closest('.cp'); if (!b) return;
+  const pre = b.previousElementSibling;
+  try { await navigator.clipboard.writeText(pre.textContent); b.textContent = 'Kopiert'; setTimeout(() => { b.textContent = 'Kopieren'; }, 1500); }
+  catch (err) { const r = document.createRange(); r.selectNodeContents(pre); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); b.textContent = 'Markiert, Strg+C'; }
+});
+
 $('copy').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(files[current]); $('copy').textContent = 'Kopiert'; }
   catch (e) { $('copy').textContent = 'Nicht möglich'; }
