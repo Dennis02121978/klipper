@@ -5,8 +5,8 @@ Eine einzelne HTML-Seite, die `printer.cfg` und `macros.cfg` für RF1000, RF2000
 
 ## Benutzen
 1. [index.html](index.html) herunterladen (auf GitHub oben rechts "Download raw file") und im Browser öffnen.
-2. Extruder, Modell, Maße, Filament, Düse, Z-Endstop und optional die Last-Zelle (Abschnitt 7) einstellen.
-3. Mit "Beide laden" `printer.cfg` und `macros.cfg` speichern und auf den Pi in `~/printer_data/config/` legen.
+2. Extruder, Modell, Maße, Filament, Düse, Z-Endstop und optional den DMS (Abschnitt 7) einstellen.
+3. Mit "Alle laden" `printer.cfg`, `macros.cfg` (bei Dual auch `offset_test.cfg`) speichern und auf den Pi in `~/printer_data/config/` legen.
 4. Die Datei `z_tasten.cfg` wird eingebunden und gehört nicht zum Generator (siehe [Z_TASTEN.md](../Z_TASTEN.md)).
 
 Abschnitt 7 (Notfall-Pause, Flow-Kompensation, Digits-Kurve) braucht das Modul

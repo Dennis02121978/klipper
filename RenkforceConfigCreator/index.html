@@ -4,29 +4,55 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Renkforce Klipper Config Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap">
 <style>
   :root {
-    --bg: #f4f5f7; --card: #ffffff; --text: #1d2330; --muted: #5d6676;
-    --line: #d9dde5; --accent: #1f6feb; --accent-text: #ffffff;
-    --code-bg: #0f1420; --code-text: #d6deeb; --warn-bg: #fff6e0; --warn-line: #e6b94d;
+    --bg: #f3f4f6; --card: #ffffff; --text: #1e293b; --muted: #6b7280;
+    --line: #e5e7eb; --accent: #2563eb; --accent-text: #ffffff;
+    --code-bg: #0f172a; --code-text: #e2e8f0; --warn-bg: #fff6e0; --warn-line: #e6b94d;
+    --shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #12151c; --card: #1a1f2b; --text: #e6e9f0; --muted: #98a1b3;
-      --line: #2c3342; --accent: #4c8dff; --accent-text: #0b0f17;
-      --code-bg: #0b0e15; --code-text: #d6deeb; --warn-bg: #2b2412; --warn-line: #7a5f1e;
+      --bg: #0f172a; --card: #1b2335; --text: #e2e8f0; --muted: #9ca3af;
+      --line: #334155; --accent: #6b9bff; --accent-text: #0f172a;
+      --code-bg: #0b1120; --code-text: #e2e8f0; --warn-bg: #2b2412; --warn-line: #7a5f1e;
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  header { padding: 20px 16px 4px; max-width: 1400px; margin: 0 auto; }
-  h1 { margin: 0 0 4px; font-size: 22px; }
-  header p { margin: 0; color: var(--muted); }
-  main { display: grid; grid-template-columns: minmax(300px, 420px) 1fr; gap: 16px;
-         padding: 16px; max-width: 1400px; margin: 0 auto; align-items: start; }
-  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+         font: 15px/1.5 "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { padding: 28px 16px 20px; margin: 0 0 12px; background: var(--card); border-bottom: 1px solid var(--line); }
+  header > * { max-width: 980px; margin-left: auto; margin-right: auto; }
+  h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; color: var(--accent); }
+  header p { margin: 0 auto; color: var(--accent); }
+  header p b { font-weight: 700; }
+  .page-title { background: #2563eb; color: #fff; font-weight: 700; font-size: 15px; padding: 11px 14px;
+                border-radius: .5rem; margin: 0 0 10px; }
+  legend, .info summary { font-weight: 700; }
+  .step:hover, .pager button:not(:disabled):hover { border-color: var(--accent); }
+  main { padding: 16px; max-width: 980px; margin: 0 auto; }
+  .steps { display: flex; gap: 6px; max-width: 980px; margin: 8px auto 0; padding: 0 16px;
+           overflow-x: auto; scrollbar-width: thin; }
+  .step { flex: 1 0 auto; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line);
+          background: var(--card); color: var(--muted); padding: 9px 12px; border-radius: 8px;
+          cursor: pointer; font: inherit; font-size: 14px; white-space: nowrap; }
+  .step b { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; align-items: center;
+            justify-content: center; font-size: 12px; background: var(--bg); border: 1px solid var(--line); }
+  .step[aria-selected=true] { color: var(--text); border-color: var(--accent); outline: 1px solid var(--accent); }
+  .step[aria-selected=true] b { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .step.done b { background: var(--bg); color: var(--accent); border-color: var(--accent); }
+  .pager { display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-top: 14px; }
+  .pager .spacer { flex: 1; }
+  .pager button { border: 1px solid var(--line); background: var(--card); color: var(--text); padding: 10px 18px;
+                  border-radius: 8px; cursor: pointer; font: inherit; }
+  .pager button.next { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .pager button:disabled { opacity: .4; cursor: not-allowed; }
+  .page-sub { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+  #summary { margin: 0 0 10px; font-size: 13.5px; color: var(--text); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: 18px; box-shadow: var(--shadow); }
   fieldset { border: 0; padding: 0; margin: 0 0 18px; }
   legend { font-weight: 600; margin-bottom: 8px; padding: 0; }
   label { display: block; margin: 6px 0 2px; font-size: 13px; color: var(--muted); }
@@ -56,6 +82,31 @@
   pre { margin: 0; background: var(--code-bg); color: var(--code-text); padding: 14px; border-radius: 8px;
         overflow: auto; max-height: 75vh; font: 12.5px/1.45 ui-monospace, Consolas, monospace; tab-size: 4; }
   [hidden] { display: none !important; }
+  .model-pics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+  .model-pics .mp { margin: 0; cursor: pointer; border: 1px solid var(--line); border-radius: .5rem; padding: 8px;
+                    display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--bg); color: var(--text); }
+  .model-pics .mp img { width: 100%; height: 130px; object-fit: contain; border-radius: .25rem; background: #fff; }
+  .model-pics .mp.sel { border-color: var(--accent); outline: 2px solid var(--accent); }
+  .model-pics .mp:hover { border-color: var(--accent); }
+  @media (max-width: 520px) { .model-pics .mp img { height: 90px; } }
+  .embed header { display: none; }
+  .embed body { background: transparent; }
+  .embed .steps { margin: 0; max-width: none; padding: 0; }
+  .embed main { max-width: none; padding: 12px 0 16px; }
+  .ibtn { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 6px;
+          padding: 0; border: 1px solid var(--accent); border-radius: 50%; background: transparent; color: var(--accent);
+          font: 700 12px/1 "Nunito", sans-serif; cursor: pointer; vertical-align: middle; flex: none; }
+  .ibtn:hover, .ibtn:focus-visible { background: var(--accent); color: var(--accent-text); }
+  dialog#infoDlg { border: 1px solid var(--line); border-radius: .75rem; padding: 0; max-width: min(520px, 92vw);
+                   background: var(--card); color: var(--text); box-shadow: 0 10px 30px #0006; }
+  dialog#infoDlg::backdrop { background: #0f172a99; }
+  #infoDlg h3 { margin: 0; padding: 11px 14px; background: #2563eb; color: #fff; font-size: 15px; }
+  #infoDlg .ibody { padding: 12px 14px; font-size: 14px; }
+  #infoDlg .ibody p { margin: 0 0 8px; }
+  #infoDlg .ibody code { background: var(--code-bg); color: var(--code-text); padding: 1px 5px; border-radius: 4px; }
+  #infoDlg form { padding: 0 14px 12px; text-align: right; margin: 0; }
+  #infoDlg form button { border: 1px solid var(--accent); background: var(--accent); color: var(--accent-text);
+                         padding: 7px 16px; border-radius: .5rem; cursor: pointer; font: inherit; }
   .info { grid-column: 1 / -1; }
   .info h2 { margin: 0 0 4px; font-size: 18px; }
   .info > p { margin: 0 0 12px; color: var(--muted); }
@@ -81,13 +132,25 @@
 <body>
 <header>
   <h1>Renkforce Klipper Config Creator</h1>
-  <p>RF1000 / RF2000 / RF2000 v2, Single oder Dual Extruder. Erzeugt <b>printer.cfg</b> und die passende <b>macros.cfg</b>.</p>
+  <p>RF1000 / RF2000 / RF2000 v2, Single oder Dual Extruder. Erzeugt <b>printer.cfg</b> und die passende <b>macros.cfg</b>, bei Dual zusätzlich <b>offset_test.cfg</b>.</p>
 </header>
 
+<nav class="steps" role="tablist" aria-label="Schritte">
+  <button class="step" role="tab" data-go="0"><b>1</b>Drucker</button>
+  <button class="step" role="tab" data-go="1"><b>2</b>Hotend</button>
+  <button class="step" role="tab" data-go="2"><b>3</b>Filament</button>
+  <button class="step" role="tab" data-go="3"><b>4</b>Anschlüsse</button>
+  <button class="step" role="tab" data-go="4"><b>5</b>DMS</button>
+  <button class="step" role="tab" data-go="5"><b>6</b>Ergebnis</button>
+  <button class="step" role="tab" data-go="6"><b>7</b>Anleitung</button>
+</nav>
+
 <main>
-  <section class="card">
+  <section class="card page" data-page="0">
+    <h2 class="page-title">Drucker</h2>
+    <p class="page-sub">Welchen Drucker hast du und wie viele Extruder?</p>
     <fieldset>
-      <legend>1. Extruder</legend>
+      <legend>Extruder</legend>
       <div class="seg">
         <label><input type="radio" name="ext" value="single" checked> Single Extruder</label>
         <label><input type="radio" name="ext" value="dual"> Dual Extruder</label>
@@ -95,12 +158,17 @@
     </fieldset>
 
     <fieldset>
-      <legend>2. Modell</legend>
+      <legend>Modell</legend>
       <select id="model">
         <option value="rf1000" selected>RF1000</option>
         <option value="rf2000">RF2000</option>
         <option value="rf2000v2">RF2000 v2</option>
       </select>
+      <div class="model-pics" id="modelPics">
+        <label class="mp" data-m="rf1000"><img src="img/rf1000.jpg" alt="" onerror="this.parentNode.hidden=true"><span>RF1000</span></label>
+        <label class="mp" data-m="rf2000"><img src="img/rf2000.jpg" alt="" onerror="this.parentNode.hidden=true"><span>RF2000</span></label>
+        <label class="mp" data-m="rf2000v2"><img src="img/rf2000v2.jpg" alt="" onerror="this.parentNode.hidden=true"><span>RF2000 v2</span></label>
+      </div>
       <div class="row" style="margin-top:8px">
         <div><label for="xmax">X max (mm)</label><input type="number" id="xmax" step="1"></div>
         <div><label for="ymax">Y max (mm)</label><input type="number" id="ymax" step="1"></div>
@@ -109,16 +177,23 @@
       <label class="check" id="ledRow"><input type="checkbox" id="led"> LED vorhanden</label>
       <div class="hint">Maße werden bei Modellwechsel automatisch gesetzt und lassen sich danach ändern. Der RF1000 hat keine LED.</div>
     </fieldset>
+  </section>
 
+  <section class="card page" data-page="1" hidden>
+    <h2 class="page-title">Hotend</h2>
+    <p class="page-sub">Filament, Düse und Extruder-Kalibrierung.</p>
     <fieldset>
-      <legend>3. Filament / Hotend</legend>
+      <legend>Filament / Hotend</legend>
       <div class="seg">
         <label><input type="radio" name="fil" value="1.75" checked> 1,75 mm</label>
         <label><input type="radio" name="fil" value="2.85"> 2,85 mm</label>
         <label><input type="radio" name="fil" value="3.00"> 3,00 mm</label>
       </div>
       <div class="row2" style="margin-top:8px">
-        <div><label for="nozzle">Düse (mm)</label><input type="number" id="nozzle" step="0.05" value="0.4"></div>
+        <div><label for="nozzle">Düse (mm)</label><select id="nozzle">
+          <option value="0.2">0,2 mm</option><option value="0.3">0,3 mm</option><option value="0.4" selected>0,4 mm</option>
+          <option value="0.5">0,5 mm</option><option value="0.6">0,6 mm</option><option value="0.7">0,7 mm</option>
+          <option value="0.8">0,8 mm</option></select></div>
         <div><label for="esteps">Extruder Steps pro mm</label><input type="number" id="esteps" step="0.01" min="0.01" value="280"></div>
       </div>
       <div class="hint">Berechnet: <b>rotation_distance = <span id="rotOut"></span></b>
@@ -127,24 +202,46 @@
     </fieldset>
 
     <fieldset id="offsetSet" hidden>
-      <legend>4. Düsenversatz (nur Dual, optional)</legend>
-      <label class="check"><input type="checkbox" id="useOffset"> Versatz jetzt eintragen</label>
-      <div class="row2" id="offsetFields" hidden>
-        <div><label for="offx">offset_x (mm)</label><input type="number" id="offx" step="0.01" value="0"></div>
-        <div><label for="offy">offset_y (mm)</label><input type="number" id="offy" step="0.01" value="0"></div>
+      <legend>Düsenversatz (nur Dual, Pflichtfeld)</legend>
+      <div class="row2" id="offsetFields">
+        <div><label for="offx">offset_x (mm)</label><input type="number" id="offx" step="0.01" value="35" required></div>
+        <div><label for="offy">offset_y (mm)</label><input type="number" id="offy" step="0.01" value="0" required></div>
       </div>
-      <div class="hint">Klipper addiert den Wert zu den Koordinaten: Liegt Düse 2 rechts von Düse 1, ist offset_x negativ.
-        Ohne Eingabe stehen 0.0 in der macros.cfg und du trägst sie später dort bei <code>[gcode_macro T1]</code> ein.</div>
+      <div class="hint">Vorbelegt mit X 35 mm und Y 0 mm. Klipper addiert den Wert zu den Koordinaten: Liegt Düse 2 rechts von Düse 1, ist offset_x negativ.
+        Prüfe den Wert an deinem Drucker und passe ihn bei Bedarf an. Spätere Korrekturen sind in der macros.cfg bei <code>[gcode_macro T1]</code> möglich.</div>
     </fieldset>
+  </section>
 
+  <section class="card page" data-page="2" hidden>
+    <h2 class="page-title">Filament</h2>
+    <p class="page-sub">Nur bei Dual: Filament-Typ und Temperaturen für den Düsenversatz-Test.</p>
     <fieldset>
-      <legend>5. Sonstiges</legend>
+      <legend>Filament-Typ</legend>
+      <div class="seg">
+        <label><input type="radio" name="ftype" value="pla" checked> PLA</label>
+        <label><input type="radio" name="ftype" value="petg"> PETG</label>
+        <label><input type="radio" name="ftype" value="manual"> Manuell</label>
+      </div>
+      <div class="row2" style="margin-top:8px">
+        <div><label for="ftemp">Düsentemperatur (°C)</label><input type="number" id="ftemp" step="1" min="150" max="300" value="195"></div>
+        <div><label for="fbed">Betttemperatur (°C)</label><input type="number" id="fbed" step="1" min="0" max="120" value="65"></div>
+      </div>
+      <div class="hint">PLA: 195 °C / Bett 65 °C, PETG: 220 °C / Bett 75 °C. Wenn du die Temperaturen änderst, wechselt der Typ auf „Manuell“.
+        Die Werte gelten als Vorgabe für <code>OFFSET_TEST</code> (nur Dual).</div>
+    </fieldset>
+  </section>
+
+  <section class="card page" data-page="3" hidden>
+    <h2 class="page-title">Anschlüsse</h2>
+    <p class="page-sub">Serielle Verbindung zum Board und Z-Endstop.</p>
+    <fieldset>
+      <legend>Sonstiges</legend>
       <label for="serial">MCU serial</label>
       <input type="text" id="serial" value="/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AL03P23U-if00-port0">
     </fieldset>
 
     <fieldset>
-      <legend>6. Z-Endstop</legend>
+      <legend>Z-Endstop</legend>
       <div class="hint" style="margin:0 0 6px">Typ: <b id="zType"></b> (RF1000 Endschalter, RF2000 und RF2000 v2 Lichtschranke)</div>
       <div class="row2">
         <div><label for="zpin">Endstop-Pin</label><input type="text" id="zpin" value="PC6" readonly tabindex="-1" style="opacity:.7;cursor:not-allowed"></div>
@@ -163,35 +260,57 @@
         Erst dann Z homen.
       </div>
     </fieldset>
+  </section>
 
+  <section class="card page" data-page="4" hidden>
+    <h2 class="page-title">DMS – Dehnungsmesstreifen (optional)</h2>
+    <p class="page-sub">Notfall-Pause, Flow-Kompensation und Live-Kurve. Du kannst diese Seite überspringen.</p>
     <fieldset>
-      <legend>7. Last-Zelle: Schutz und Anzeige (optional)</legend>
-      <label class="check"><input type="checkbox" id="guard"> Notfall-Pause und Flow-Kompensation einbinden</label>
-      <div id="guardFields" hidden>
+      <legend>Schutz und Anzeige</legend>
+      <label class="check"><input type="checkbox" id="guard" checked> Notfall-Pause und Flow-Kompensation einbinden</label>
+      <div id="guardFields">
         <div class="hint" style="margin:0 0 6px">Braucht das Modul <code>rf1000_pressure_guard.py</code> aus dem Klipper-Fork.
-          Alle Werte sind in der Einheit von <code>LCP_READ</code> (nicht in alten Firmware-Digits). <b>0 = aus.</b>
-          Siehe Abschnitt „Last-Zelle einstellen“ weiter unten.</div>
-        <div class="row2">
-          <div><label for="emin">Pause unter (Digits, negativ)</label><input type="number" id="emin" step="10" value="0"></div>
-          <div><label for="emax">Pause über (Digits)</label><input type="number" id="emax" step="10" value="0"></div>
-        </div>
-        <div class="row2">
-          <div><label for="esamp">Mittelwert über (Messwerte)</label><input type="number" id="esamp" step="1" min="1" value="5"></div>
-          <div><label for="fminz">Korrektur erst ab Z (mm)</label><input type="number" id="fminz" step="0.1" min="0" value="0.5"></div>
-        </div>
-        <div class="row2">
-          <div><label for="fmin">Flow ab (Digits)</label><input type="number" id="fmin" step="10" value="0"></div>
-          <div><label for="fmax">Volle Wirkung bei (Digits)</label><input type="number" id="fmax" step="10" value="0"></div>
-        </div>
-        <div class="row2">
-          <div><label for="fpct">Extrusion bei voller Wirkung (%)</label><input type="number" id="fpct" step="1" min="-99" max="99" value="0"></div>
-          <div><label for="vpct">Vorschub bei voller Wirkung (%)</label><input type="number" id="vpct" step="1" min="-90" max="99" value="0"></div>
-        </div>
+          Alle Werte sind in der Einheit von <code>LCP_READ</code> (nicht in alten Firmware-Digits). Notfall-Pause und Flow-Kompensation lassen sich getrennt abwählen.
+          Hinweise zum Einstellen stehen auf der Seite „Anleitung“ (Schritt 7).</div>
+        <fieldset style="margin:10px 0 0">
+          <legend>Notfall-Pause</legend>
+          <label class="check"><input type="checkbox" id="eon" checked> Notfall-Pause verwenden</label>
+          <div id="eFields">
+            <div class="row2">
+              <div><label for="emin">Pause unter (Digits, negativ)</label><input type="number" id="emin" step="10" value="-6000"></div>
+              <div><label for="emax">Pause über (Digits)</label><input type="number" id="emax" step="10" value="6000"></div>
+            </div>
+            <div class="row2">
+              <div><label for="esamp">Mittelwert über (Messwerte)</label><input type="number" id="esamp" step="1" min="1" value="5"></div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset style="margin:10px 0 0">
+          <legend>Flow-Kompensation</legend>
+          <label class="check"><input type="checkbox" id="fon" checked> Flow-Kompensation verwenden</label>
+          <div id="fFields">
+            <div class="row2">
+              <div><label for="fmin">Flow ab (Digits)</label><input type="number" id="fmin" step="10" value="4000"></div>
+              <div><label for="fmax">Volle Wirkung bei (Digits)</label><input type="number" id="fmax" step="10" value="5000"></div>
+            </div>
+            <div class="row2">
+              <div><label for="fpct">Extrusion bei voller Wirkung (%)</label><input type="number" id="fpct" step="1" min="-99" max="99" value="30"></div>
+              <div><label for="vpct">Vorschub bei voller Wirkung (%)</label><input type="number" id="vpct" step="1" min="-90" max="99" value="30"></div>
+            </div>
+            <div class="row2">
+              <div><label for="fminz">Korrektur erst ab Z (mm)</label><input type="number" id="fminz" step="0.1" min="0" value="0.2"></div>
+            </div>
+          </div>
+        </fieldset>
         <label class="check"><input type="checkbox" id="digits" checked> Kurve „Digits“ in Mainsail anzeigen</label>
       </div>
     </fieldset>
+  </section>
 
-    <div class="warn">
+  <section class="card page" data-page="5" hidden>
+    <h2 class="page-title">Ergebnis</h2>
+    <p class="page-sub">Prüfe die Dateien, lade sie herunter und lege sie auf den Pi nach <code>~/printer_data/config/</code>.</p>
+    <div class="warn" style="margin-top:0">
       <b>Haftungsausschluss:</b> Diese Seite und die erzeugten Dateien werden ohne Gewähr bereitgestellt.
       Die Nutzung erfolgt auf eigene Gefahr, eine Haftung für Schäden an Drucker, Umgebung oder Personen ist ausgeschlossen.
       Bitte alle Werte (Pins, Maße, Endstops, Temperaturen) selbst kontrollieren, bevor du den Drucker in Betrieb nimmst,
@@ -206,25 +325,25 @@
         <li>Input Shaper</li>
       </ul>
     </div>
-  </section>
 
-  <section class="card">
+    <div id="summary" style="margin-top:14px"></div>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" data-file="printer" aria-selected="true">printer.cfg</button>
       <button class="tab" role="tab" data-file="macros" aria-selected="false">macros.cfg</button>
+      <button class="tab" role="tab" data-file="offset_test" aria-selected="false" id="tabOffset" hidden>offset_test.cfg</button>
       <span class="spacer"></span>
       <button class="act" id="copy">Kopieren</button>
       <button class="act" id="dl">Diese Datei laden</button>
-      <button class="act" id="dlAll">Beide laden</button>
+      <button class="act" id="dlAll">Alle laden</button>
     </div>
     <pre id="out"></pre>
     <div class="hint" id="notes" style="margin-top:10px"></div>
   </section>
 
-  <section class="card info">
-    <h2>Last-Zelle einstellen und bedienen</h2>
-    <p>Die Last-Zelle misst, wie stark die Düse gegen das Bett oder gegen das Filament drückt. Daraus entstehen drei Funktionen:
-       Sense Offset (Z-Korrektur in der ersten Schicht), Notfall-Pause und Flow-Kompensation. Die beiden letzten sind optional (Abschnitt 7 links).</p>
+  <section class="card info page" data-page="6" hidden>
+    <h2>DMS (Dehnungsmesstreifen) einstellen und bedienen</h2>
+    <p>Der DMS (Dehnungsmesstreifen) misst, wie stark die Düse gegen das Bett oder gegen das Filament drückt. Daraus entstehen drei Funktionen:
+       Sense Offset (Z-Korrektur in der ersten Schicht), Notfall-Pause und Flow-Kompensation. Die beiden letzten sind optional (Schritt 5 „DMS“).</p>
 
     <details open>
       <summary>1. Einbau in Kürze</summary>
@@ -232,7 +351,7 @@
         <ol>
           <li>Datei <code>rf1000_pressure_guard.py</code> nach <code>~/klipper/klippy/extras/</code> auf dem Raspberry Pi kopieren
               (liegt im Klipper-Fork <code>Dennis02121978/klipper</code>).</li>
-          <li>Abschnitt 7 links aktivieren und <code>printer.cfg</code> neu laden. Die Reihenfolge ist wichtig:
+          <li>In Schritt 5 „DMS“ die Funktion aktivieren und die neu erzeugte <code>printer.cfg</code> verwenden. Die Reihenfolge ist wichtig:
               <code>[rf1000_pressure_guard]</code> steht vor <code>[temperature_sensor Digits]</code>.</li>
           <li><b>Dienst neu starten:</b> <code>sudo systemctl restart klipper</code>. Ein <code>RESTART</code> im Mainsail lädt bereits
               geladene Python-Module nicht neu und führt bei geänderten Modulen zu Fehlern.</li>
@@ -308,14 +427,27 @@
     <details>
       <summary>5. Sense Offset (Z-Korrektur)</summary>
       <div class="body">
-        <p>Das Hotend dehnt sich beim Aufheizen aus, dadurch sinkt der Abstand zum Bett. <code>[z_sense_offset]</code> korrigiert das in der ersten
-           Schicht über die gemessene Kraft. Er ist im Generator immer enthalten.</p>
+        <p>Nach dem Aufheizen dehnen sich Hotend und Druckerteile aus, die Düse liegt dann näher am Bett als beim Kalibrieren. Das drückt die Düse in der
+           ersten Schicht ins Bett und erhöht die Kraft am DMS. <code>[z_sense_offset]</code> gleicht das aus, indem es den Abstand zwischen Düse und Bett im ersten Layer
+           schrittweise vergrößert (Z wird angehoben). Das Verfahren stammt von Nibbels/Wessix aus der Repetier-Firmware. Das Modul ist im Generator immer enthalten
+           und wird in <code>PRINT_START</code> mit <code>Z_SENSE_OFFSET</code> eingeschaltet.</p>
+        <p><b>So arbeitet die Regelung:</b></p>
+        <ul>
+          <li><b>Nur im ersten Layer:</b> Aktiv ist sie nur, solange die Düse unterhalb von <code>max_z_height</code> ist. Darüber wird nichts mehr geändert, der erreichte Offset bleibt bis zum Ende des Drucks bestehen.</li>
+          <li><b>Messung:</b> Es wird über mehrere Messwerte (Standard 10) der Betrag der Kraft gemittelt, mit etwas Glättung. Die Einbaurichtung des DMS spielt daher keine Rolle.</li>
+          <li><b>Nur anheben, nie zurück:</b> Liegt die gemittelte Kraft über <code>force_threshold</code>, wird der Abstand um jeweils 1 µm (<code>step_size</code>) oder mehr vergrößert. Sinkt die Kraft wieder (zum Beispiel bei Retracts), wird der Offset <b>nicht</b> zurückgenommen. Die Düse kommt dem Bett also nie näher als ohne Sense Offset.</li>
+          <li><b>Schrittweite:</b> Bei mehr als 10 % über der Schwelle (<code>relative_tolerance</code>) und steigender Kraft wird mit dem Überschuss größer korrigiert, höchstens 48 Schritte auf einmal. Je mehr Offset schon da ist, desto langsamer wird weiter korrigiert, damit nichts überschwingt. Bei kleinem Überschuss und fallender Kraft passiert nichts.</li>
+          <li><b>Obergrenze:</b> Mehr als <code>max_z_offset</code> wird nie korrigiert. So wird eine Düse, die aus anderem Grund zu tief steht, nicht endlos angehoben.</li>
+          <li><b>Zurücksetzen:</b> Jeder Aufruf von <code>Z_SENSE_OFFSET</code> setzt den Offset auf 0 und startet neu. Homing schaltet die Funktion aus.</li>
+        </ul>
         <table>
           <tr><th>Einstellung</th><th>Bedeutung</th></tr>
-          <tr><td><code>force_threshold</code></td><td>Kraft-Schwelle (Standard 4000, gleiche Einheit wie oben).</td></tr>
-          <tr><td><code>max_z_offset</code></td><td>Größte erlaubte Korrektur in mm (Standard 0,2).</td></tr>
-          <tr><td><code>max_z_height</code></td><td>Nur bis zu dieser Höhe aktiv (Standard 0,33 mm).</td></tr>
+          <tr><td><code>force_threshold</code></td><td>Kraft-Schwelle am DMS (Standard 4000, gleiche Einheit wie oben). Als Richtwert die Kraft des normalen Drucks nehmen und etwa 20 % oder 1000 Digits Reserve addieren.</td></tr>
+          <tr><td><code>max_z_offset</code></td><td>Größte erlaubte Korrektur in mm (Standard 0,2; in der Repetier-Firmware 0,18).</td></tr>
+          <tr><td><code>max_z_height</code></td><td>Nur bis zu dieser Düsenhöhe aktiv (Standard 0,33 mm, also im ersten Layer).</td></tr>
         </table>
+        <p>Übrige Werte (<code>n_average_force</code>, <code>smoothing</code>, <code>step_size</code>, <code>relative_tolerance</code>, <code>acuteness</code>, <code>max_steps_at_once</code>)
+           haben sinnvolle Vorgaben, der Generator schreibt sie nicht. Bei Bedarf kannst du sie in der <code>printer.cfg</code> ergänzen.</p>
       </div>
     </details>
 
@@ -327,7 +459,7 @@
           <tr><td><code>LCP_READ</code></td><td>Aktuellen Kraftwert ausgeben.</td></tr>
           <tr><td><code>RF_EMERGENCY_PAUSE</code></td><td>Grenzen anzeigen. Mit <code>MIN=</code> und <code>MAX=</code> ändern, beide 0 schaltet aus.</td></tr>
           <tr><td><code>RF_FLOW_COMP</code></td><td>Einstellung anzeigen. Mit <code>MIN= MAX= FLOW= FEED=</code> ändern.</td></tr>
-          <tr><td><code>Z_SENSE_OFFSET</code></td><td>Sense Offset aus dem Fork.</td></tr>
+          <tr><td><code>Z_SENSE_OFFSET</code></td><td>Schaltet den Sense Offset ein und setzt ihn auf 0. Optional <code>FORCE_THRESHOLD=</code> und <code>MAX_Z_OFFSET=</code>. Steht schon in <code>PRINT_START</code>.</td></tr>
         </table>
         <p>Änderungen mit <code>RF_…</code> gelten nur bis zum nächsten Neustart. Trage gute Werte in <code>printer.cfg</code> ein
            (oder erzeuge die Datei hier neu).</p>
@@ -340,7 +472,7 @@
         <ol>
           <li>Ursache klären: Düse verstopft? Filament verhakt? Bett zu nah? Der Kopf ist über dein <code>PAUSE</code>-Makro geparkt.</li>
           <li>Beheben, Hotend wieder auf Temperatur bringen lassen, dann <code>RESUME</code>.</li>
-          <li>Löst die Pause immer wieder bei normalem Druck aus, sind die Grenzen zu eng. Miss nach Abschnitt 2 neu.</li>
+          <li>Löst die Pause immer wieder bei normalem Druck aus, sind die Grenzen zu eng. Miss nach Punkt 2 („Werte messen“) neu.</li>
         </ol>
       </div>
     </details>
@@ -360,7 +492,18 @@
         </table>
       </div>
     </details>
+
+    <details open>
+      <summary>9. Orca Slicer: Einstellungen, Start- und End-G-Code</summary>
+      <div class="body" id="orcaBody"></div>
+    </details>
   </section>
+
+  <div class="pager">
+    <button type="button" id="prevBtn">Zurück</button>
+    <span class="spacer"></span>
+    <button type="button" class="next" id="nextBtn">Weiter</button>
+  </div>
 </main>
 
 <script>
@@ -386,12 +529,17 @@ function applyModel() {
   $('ledRow').hidden = m === 'rf1000';
   $('zmin').value = ZMIN[m];
   $('zType').textContent = m === 'rf1000' ? 'Endschalter (mechanisch)' : 'Lichtschranke';
+  document.querySelectorAll('#modelPics .mp').forEach(p => p.classList.toggle('sel', p.dataset.m === m));
 }
+document.querySelectorAll('#modelPics .mp').forEach(p => p.addEventListener('click', () => {
+  $('model').value = p.dataset.m; applyModel(); render();
+}));
 
 function state() {
   const dual = radio('ext') === 'dual';
   const xmax = num('xmax', 200), ymax = num('ymax', 285), zmax = num('zmax', 200);
-  const useOff = dual && $('useOffset').checked;
+  const useOff = dual;
+  const eon = $('eon').checked, fon = $('fon').checked;
   return {
     dual, model: NAMES[$('model').value], xmax, ymax, zmax,
     led: $('model').value !== 'rf1000' && $('led').checked, fil: radio('fil'),
@@ -400,13 +548,14 @@ function state() {
     serial: $('serial').value.trim(), zmin: num('zmin', -1.2),
     zpin: ($('zinv').checked ? '!' : '') + ($('zpin').value.trim().replace(/^!/, '') || 'PC6'),
     light: $('model').value !== 'rf1000',
-    offx: useOff ? num('offx', 0) : 0, offy: useOff ? num('offy', 0) : 0,
+    ftype: radio('ftype'), ftemp: Math.min(300, Math.max(150, num('ftemp', 195))), fbed: Math.min(120, Math.max(0, num('fbed', 65))),
+    offx: useOff ? num('offx', 35) : 0, offy: useOff ? num('offy', 0) : 0,
     guard: $('guard').checked, digits: $('digits').checked,
-    emin: -Math.abs(num('emin', 0)), emax: Math.abs(num('emax', 0)),
-    esamp: Math.max(1, Math.round(num('esamp', 5))), fminz: Math.max(0, num('fminz', 0.5)),
-    fmin: Math.min(Math.abs(num('fmin', 0)), Math.abs(num('fmax', 0))),
-    fmax: Math.max(Math.abs(num('fmin', 0)), Math.abs(num('fmax', 0))),
-    fpct: Math.min(99, Math.max(-99, num('fpct', 0))), vpct: Math.min(99, Math.max(-90, num('vpct', 0)))
+    emin: eon ? -Math.abs(num('emin', 0)) : 0, emax: eon ? Math.abs(num('emax', 0)) : 0,
+    esamp: Math.max(1, Math.round(num('esamp', 5))), fminz: Math.max(0, num('fminz', 0.2)),
+    fmin: fon ? Math.min(Math.abs(num('fmin', 0)), Math.abs(num('fmax', 0))) : 0,
+    fmax: fon ? Math.max(Math.abs(num('fmin', 0)), Math.abs(num('fmax', 0))) : 0,
+    fpct: fon ? Math.min(99, Math.max(-99, num('fpct', 0))) : 0, vpct: fon ? Math.min(99, Math.max(-90, num('vpct', 0))) : 0
   };
 }
 
@@ -414,7 +563,7 @@ function state() {
 function guardBlock(s) {
   if (!s.guard) return '';
   let o = `[rf1000_pressure_guard]
-# Notfall-Pause und Flow-Kompensation per Last-Zelle (Modul rf1000_pressure_guard.py).
+# Notfall-Pause und Flow-Kompensation per DMS (Modul rf1000_pressure_guard.py).
 # Werte in der Einheit von LCP_READ. 0 = aus.${s.digits ? ' Muss VOR [temperature_sensor Digits] stehen.' : ''}
 emergency_min: ${fmt(s.emin)}
 emergency_max: ${fmt(s.emax)}
@@ -429,7 +578,7 @@ flow_min_z: ${fmt(s.fminz)}
 
 `;
   if (s.digits) o += `[temperature_sensor Digits]
-# Last-Zelle als Kurve in Mainsail (Einheit dort fest: °C)
+# DMS-Kraft als Kurve in Mainsail (Einheit dort fest: °C)
 sensor_type: rf1000_force
 
 
@@ -495,7 +644,7 @@ serial: ${s.serial}
 [exclude_object]
 
 [include mainsail.cfg]
-[include macros.cfg]
+[include macros.cfg]${s.dual ? '\n[include offset_test.cfg]' : ''}
 [include z_tasten.cfg]
 
 [printer]
@@ -673,15 +822,18 @@ speed: 100
 horizontal_move_z: 2
 mesh_min: 10,50
 mesh_max: ${fmt(s.xmax)},${fmt(s.ymax - 25)}
-algorithm:lagrange
-probe_count: 5,5
+algorithm: ${s.model === 'RF2000 v2' ? 'bicubic' : 'lagrange'}
+probe_count: ${s.model === 'RF2000 v2' ? '6,9' : '5,5'}
 fade_start: 1.0
 fade_end: 10.0
 
 
 [z_sense_offset]
+# Sense Offset: hebt das Bett im ersten Layer an, wenn die Kraft ueber der Schwelle liegt.
+# Wird mit Z_SENSE_OFFSET in PRINT_START eingeschaltet (Homing schaltet ihn wieder aus).
 force_threshold: 4000
 max_z_offset: 0.2
+max_z_height: 0.33
 
 
 [display_template _load_cell_digits]
@@ -693,6 +845,117 @@ position: 0, 10
 text: { render("_load_cell_digits") }
 `;
   return o;
+}
+
+// Eigene Include-Datei offset_test.cfg (nur Dual): Testdruck und Korrektur des Duesenversatzes
+function buildOffsetTest(s) {
+  // Schichthoehe = halber Duesendurchmesser (mind. 0.1), Linienbreite = 1.25 x Duese
+  const offH = Math.max(0.1, Math.round(s.nozzle * 0.5 * 100) / 100);
+  const offE = Math.round(s.nozzle * 1.25 * offH / (Math.PI * Math.pow(parseFloat(s.fil) / 2, 2)) * 100000) / 100000;
+  return `################################################################################
+# Duesenversatz-Test fuer ${s.model} Dual Extruder (erzeugt mit dem Config Creator)
+# Wird in der printer.cfg mit [include offset_test.cfg] eingebunden.
+# Braucht die Makros T0 und T1 aus der macros.cfg.
+################################################################################
+
+# ---------------------- Duesenversatz einstellen ----------------------
+# 0) Aufruf: OFFSET_TEST  (Vorgabe aus dem Creator: ${fmt(s.ftemp)} Grad, Bett ${fmt(s.fbed)} Grad)
+#            OFFSET_TEST MATERIAL=PLA  (195 Grad, Bett 65 Grad)
+#            OFFSET_TEST MATERIAL=PETG (220 Grad, Bett 75 Grad)
+#            OFFSET_TEST BED_TEMP=70 TEMP0=205 TEMP1=205  (manuell, TEMP= setzt beide Duesen)
+# 1) OFFSET_TEST druckt zwei Messfelder (Duese ${fmt(s.nozzle)} mm, Filament ${s.fil} mm):
+#    11 Linien je Richtung. T0 druckt die untere Haelfte, T1 die obere Haelfte jeder Linie.
+#    Linie 6 liegt genau auf dem aktuellen Versatz, jede Linie daneben ist um 0.1 mm verschoben.
+#    Die Linie, bei der oben und unten ohne Knick ineinander uebergehen, zeigt die Korrektur:
+#    Korrektur = (Linien-Nr - 6) x 0.1 mm.
+# 2) NOZZLE_OFFSET_ADJUST X=<Korrektur> Y=<Korrektur> uebernimmt sie bis zum Neustart.
+# 3) Danach den angezeigten Wert dauerhaft in [gcode_macro T1] (variable_offset_x/y) eintragen.
+[gcode_macro OFFSET_TEST]
+description: Duesenversatz-Testdruck (MATERIAL=PLA oder PETG, oder manuell BED_TEMP/TEMP0/TEMP1)
+gcode:
+    # Vorgabe aus dem Creator: ${s.ftype === 'pla' ? 'PLA' : s.ftype === 'petg' ? 'PETG' : 'manuell'}, ${fmt(s.ftemp)} Grad, Bett ${fmt(s.fbed)} Grad.
+    # MATERIAL=PLA (195/65) oder MATERIAL=PETG (220/75) ueberschreibt die Vorgabe,
+    # manuelle Werte ueberschreiben alles, z.B. OFFSET_TEST BED_TEMP=70 TEMP0=205 TEMP1=205
+    {% set mat = params.MATERIAL|default("")|upper %}
+    {% if mat not in ["", "PLA", "PETG"] %}
+    {action_raise_error("MATERIAL muss PLA oder PETG sein. Fuer andere Werte BED_TEMP, TEMP0 und TEMP1 angeben.")}
+    {% endif %}
+    {% set pext = 220.0 if mat == "PETG" else (195.0 if mat == "PLA" else ${fmt(s.ftemp)}) %}
+    {% set pbed = 75.0 if mat == "PETG" else (65.0 if mat == "PLA" else ${fmt(s.fbed)}) %}
+    {% set bed = params.BED_TEMP|default(pbed)|float %}
+    {% set t0 = params.TEMP0|default(params.TEMP|default(pext))|float %}
+    {% set t1 = params.TEMP1|default(params.TEMP|default(pext))|float %}
+    {% set h = ${fmt(offH)} %}
+    {% set epm = ${fmt(offE)} %}
+    {% set x0 = 25.0 %}
+    {% set y0 = 30.0 %}
+    {% set bx = 110.0 %}
+    {% set by = 30.0 %}
+
+    {% if "xyz" not in printer.toolhead.homed_axes %}
+    G28
+    {% endif %}
+    BED_MESH_PROFILE LOAD="default"
+    M140 S{bed}
+    SET_HEATER_TEMPERATURE HEATER=extruder TARGET={t0}
+    SET_HEATER_TEMPERATURE HEATER=extruder1 TARGET={t1}
+    M190 S{bed}
+    TEMPERATURE_WAIT SENSOR=extruder MINIMUM={t0 - 3}
+    TEMPERATURE_WAIT SENSOR=extruder1 MINIMUM={t1 - 3}
+    M83
+
+    # Erst Duese 1 (Referenz), dann Duese 2 mit dem Versatz aus T1
+    {% for tool in [0, 1] %}
+      {% if tool == 0 %}
+      T0
+      {% else %}
+      T1
+      {% endif %}
+      # Feld X: senkrechte Linien, Abstand 5 mm
+      {% for i in range(11) %}
+        {% set xv = x0 + i * 5 + (i - 5) * 0.1 * tool %}
+        {% set ya = y0 + 10 * tool %}
+        G1 Z{h + 0.5} F3000
+        G1 X{"%.2f" % xv} Y{"%.2f" % ya} F6000
+        G1 Z{h} F600
+        G1 E0.4 F1800
+        G1 Y{"%.2f" % (ya + 10)} E{"%.4f" % (10 * epm)} F1200
+        G1 E-0.4 F1800
+      {% endfor %}
+      # Feld Y: waagerechte Linien, Abstand 5 mm
+      {% for i in range(11) %}
+        {% set yv = by + i * 5 + (i - 5) * 0.1 * tool %}
+        {% set xa = bx + 10 * tool %}
+        G1 Z{h + 0.5} F3000
+        G1 X{"%.2f" % xa} Y{"%.2f" % yv} F6000
+        G1 Z{h} F600
+        G1 E0.4 F1800
+        G1 X{"%.2f" % (xa + 10)} E{"%.4f" % (10 * epm)} F1200
+        G1 E-0.4 F1800
+      {% endfor %}
+    {% endfor %}
+
+    G1 Z10 F3000
+    T0
+    TURN_OFF_HEATERS
+    M82
+    G92 E0
+    G1 X0 Y0 F6000
+    RESPOND MSG="Fertig. Linie 6 = aktueller Versatz. Beste Linie ablesen: Korrektur = (Nr - 6) x 0.1 mm. Dann NOZZLE_OFFSET_ADJUST X=.. Y=.. ausfuehren."
+
+
+[gcode_macro NOZZLE_OFFSET_ADJUST]
+description: Duesenversatz von T1 aendern (X/Y = Korrektur in mm aus dem OFFSET_TEST)
+gcode:
+    {% set nx = printer["gcode_macro T1"].offset_x|float + params.X|default(0)|float %}
+    {% set ny = printer["gcode_macro T1"].offset_y|float + params.Y|default(0)|float %}
+    SET_GCODE_VARIABLE MACRO=T1 VARIABLE=offset_x VALUE={nx}
+    SET_GCODE_VARIABLE MACRO=T1 VARIABLE=offset_y VALUE={ny}
+    {% if printer.toolhead.extruder == "extruder1" %}
+    SET_GCODE_OFFSET X={nx} Y={ny} MOVE=0
+    {% endif %}
+    RESPOND MSG="Neuer Versatz T1: X={"%.2f" % nx} Y={"%.2f" % ny} (gilt bis zum Neustart). Dauerhaft in macros.cfg bei [gcode_macro T1] eintragen."
+`;
 }
 
 function buildMacros(s) {
@@ -889,6 +1152,9 @@ ${led(1, 0, 0)}
 
     M190 S{Betttemperatur}
     M109 S{Extrudertemperatur}
+
+    # Sense Offset einschalten (nach G28 noetig, Homing schaltet ihn aus; setzt den Offset auf 0)
+    Z_SENSE_OFFSET
 `;
   if (s.led) o += `
     # LED auf Lila/Blau = Bereit
@@ -986,6 +1252,7 @@ gcode:
  ACTIVATE_EXTRUDER EXTRUDER=extruder1
  {% endif %}
  SET_GCODE_OFFSET X={offset_x} Y={offset_y} MOVE=0
+
 
 `;
   }
@@ -1117,18 +1384,63 @@ function addedLines(a, b) {
   return added;
 }
 
+// Orca-Slicer-Anleitung: passt sich an Modell, Extruder, Düse und Filament an
+function buildOrca(s) {
+  const startCode = s.dual
+    ? 'PRINT_START BED_TEMP=[bed_temperature_initial_layer_single] EXTRUDER_TEMP={nozzle_temperature_initial_layer[initial_extruder]}'
+    : 'PRINT_START BED_TEMP=[bed_temperature_initial_layer_single] EXTRUDER_TEMP=[nozzle_temperature_initial_layer]';
+  const change = s.dual ? 'T[next_extruder]' : 'M600';
+  const rows = [
+    ['G-Code-Variante (G-code flavor)', 'Klipper'],
+    ['Druckbett-Form', `Rechteckig, ${fmt(s.xmax)} × ${fmt(s.ymax)} mm, Ursprung 0 / 0`],
+    ['Maximale Druckhöhe', `${fmt(s.zmax)} mm`],
+    ['Düsendurchmesser', `${fmt(s.nozzle)} mm${s.dual ? ' (bei beiden Extrudern)' : ''}`],
+    ['Filamentdurchmesser', `${s.fil} mm`],
+    ['Anzahl Extruder', s.dual ? '2' : '1'],
+    ['Relative Extruder-Adressierung', 'aus (absolut), passend zu <code>M82</code> in <code>PRINT_START</code>']
+  ];
+  const table = '<table><tr><th>Einstellung (Drucker → Allgemein / Extruder)</th><th>Wert</th></tr>' +
+    rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('') + '</table>';
+  const block = (title, code) => `<p><b>${title}</b></p><pre>${esc(code)}</pre>`;
+  return `<p>Orca-Profil für <b>${s.model}</b> (${s.dual ? 'Dual' : 'Single'} Extruder). Die Werte folgen deinen Eingaben auf den Seiten davor.</p>` +
+    table +
+    block('Drucker → Maschinen-G-Code → Start-G-Code', startCode) +
+    `<p class="hint">Der Start-G-Code ruft nur das Makro <code>PRINT_START</code> aus der <code>macros.cfg</code> auf. Es fährt Home, lädt das Mesh,
+      heizt Bett und Düse auf die übergebenen Temperaturen und zieht die Prime Line.${s.dual ? ' Bei Dual heizt Orca die zweite Düse selbst, sobald sie gebraucht wird.' : ''}
+      Die Temperaturen stammen aus dem Filament-Profil (Erste Schicht). Bett und Düse stellst du also im Slicer ein, nicht im Makro.</p>` +
+    block('Drucker → Maschinen-G-Code → End-G-Code', 'PRINT_END') +
+    `<p class="hint"><code>PRINT_END</code> schaltet Heizungen und Lüfter aus, zieht zurück, hebt Z an, parkt den Kopf und deaktiviert die Motoren.</p>` +
+    block('Drucker → Maschinen-G-Code → Pause-G-Code', 'PAUSE') +
+    block(`Drucker → Maschinen-G-Code → Filamentwechsel-G-Code`, change) +
+    (s.dual ? '<p class="hint">Bei Dual löst Orca damit den Werkzeugwechsel aus. <code>T0</code> und <code>T1</code> stehen in der <code>macros.cfg</code> und setzen den Düsenversatz.</p>'
+            : '<p class="hint"><code>M600</code> ist der Filamentwechsel-Assistent aus der <code>macros.cfg</code>.</p>') +
+    '<p class="hint">Die Namen der Platzhalter ändern sich zwischen Orca-Versionen etwas. Prüfe sie im Slicer über das Fragezeichen neben dem G-Code-Feld oder in der Platzhalterliste. Teste den ersten Druck mit Aufsicht.</p>';
+}
+
 const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const prev = { printer: null, macros: null };
+const prev = { printer: null, macros: null, offset_test: null };
 
 function render(arg) {
   const quiet = arg === true;
   const s = state();
   $('rotOut').textContent = fmt(s.rot);
+  $('summary').innerHTML = '<b>Deine Auswahl:</b> ' + esc([
+    s.model, s.dual ? 'Dual Extruder' : 'Single Extruder', `${fmt(s.xmax)} × ${fmt(s.ymax)} × ${fmt(s.zmax)} mm`,
+    `Filament ${s.fil} mm`, `Düse ${fmt(s.nozzle)} mm`, `Z-Endstop ${s.zpin}`,
+    s.guard ? (s.emin || s.emax || s.fpct || s.vpct ? 'DMS: Schutz aktiv' : 'DMS: Modul eingebunden, Grenzen 0') : 'DMS: ohne Schutz'
+  ].join(' · '));
+  $('orcaBody').innerHTML = buildOrca(s);
   files.printer = buildPrinter(s);
   files.macros = buildMacros(s);
+  files.offset_test = s.dual ? buildOffsetTest(s) : '';
+  $('tabOffset').hidden = !s.dual;
+  if (!s.dual && current === 'offset_test') {
+    current = 'printer';
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x.dataset.file === 'printer'));
+  }
 
   const hl = {};
-  for (const k of ['printer', 'macros']) {
+  for (const k of ['printer', 'macros', 'offset_test']) {
     hl[k] = !quiet && prev[k] !== null ? addedLines(prev[k], files[k].split('\n')) : new Set();
     prev[k] = files[k].split('\n');
   }
@@ -1136,8 +1448,8 @@ function render(arg) {
     `<span class="ln${hl[current].has(i) ? ' hl' : ''}">${esc(t) || '&#8203;'}</span>`).join('');
   const first = $('out').querySelector('.hl');
   if (first) first.scrollIntoView({ block: 'nearest' });
-  for (const k of ['printer', 'macros']) {
-    if (k !== current && hl[k].size) {
+  for (const k of ['printer', 'macros', 'offset_test']) {
+    if (k !== current && hl[k].size && files[k]) {
       const tab = document.querySelector(`.tab[data-file=${k}]`);
       tab.classList.remove('flash'); void tab.offsetWidth; tab.classList.add('flash');
     }
@@ -1145,7 +1457,7 @@ function render(arg) {
 
   const notes = [];
   if (s.fil !== '1.75') notes.push(`Prime Line in PRINT_START auf ${s.fil} mm Filament umgerechnet. Retract-Längen bei Bedarf selbst anpassen.`);
-  if (s.dual && !$('useOffset').checked) notes.push('Düsenversatz steht auf 0.0 und wird später im Makro T1 eingetragen.');
+  if (s.dual) notes.push(`Düsenversatz: X ${fmt(s.offx)} mm, Y ${fmt(s.offy)} mm. Die Datei <code>offset_test.cfg</code> liegt neben der printer.cfg (wird dort eingebunden). Zum Prüfen <code>OFFSET_TEST</code> ausführen (Vorgabe ${fmt(s.ftemp)} °C, Bett ${fmt(s.fbed)} °C), alternativ mit <code>MATERIAL=PLA</code>, <code>MATERIAL=PETG</code> oder manuell mit <code>BED_TEMP=… TEMP0=… TEMP1=…</code>. Danach mit <code>NOZZLE_OFFSET_ADJUST X=… Y=…</code> korrigieren.`);
   if (s.guard) {
     notes.push('Das Modul <code>rf1000_pressure_guard.py</code> muss in <code>klippy/extras/</code> liegen, sonst meldet Klipper „Section rf1000_pressure_guard is not a valid config section“. Nach dem Kopieren den Dienst neu starten (<code>sudo systemctl restart klipper</code>), ein RESTART im Mainsail reicht nicht.');
     if (!s.emin && !s.emax) notes.push('Notfall-Pause ist aus (beide Grenzen 0).');
@@ -1166,11 +1478,100 @@ function download(name, text) {
 
 document.querySelectorAll('input[name=ext]').forEach(e => e.addEventListener('change', () => {
   $('offsetSet').hidden = radio('ext') !== 'dual';
-  applyModel(); render();
+  applyModel(); render(); updateSteps();
+  if (page === FILAMENT && radio('ext') !== 'dual') showPage(1, false);
 }));
 $('model').addEventListener('change', () => { applyModel(); render(); });
+const FPRESET = { pla: [195, 65], petg: [220, 75] };
+document.querySelectorAll('input[name=ftype]').forEach(r => r.addEventListener('change', () => {
+  const p = FPRESET[radio('ftype')];
+  if (p) { $('ftemp').value = p[0]; $('fbed').value = p[1]; }
+  render();
+}));
+['ftemp', 'fbed'].forEach(id => $(id).addEventListener('input', () => {
+  const p = FPRESET[radio('ftype')];
+  if (p && (num('ftemp', 0) !== p[0] || num('fbed', 0) !== p[1])) document.querySelector('input[name=ftype][value=manual]').checked = true;
+  render();
+}));
 $('guard').addEventListener('change', () => { $('guardFields').hidden = !$('guard').checked; });
-$('useOffset').addEventListener('change', () => { $('offsetFields').hidden = !$('useOffset').checked; render(); });
+// Info-Popups: ein „i“ neben jeder Einstellung
+const INFO = {
+  ext: ['Extruder', '<p><b>Single:</b> ein Extruder mit einem Hotend.</p><p><b>Dual:</b> zwei Extruder. Dann erzeugt der Creator zusätzlich den zweiten Extruder, die Werkzeugwechsel-Makros <code>T0</code>/<code>T1</code> und optional den Düsenversatz.</p>'],
+  model: ['Modell', '<p>Wählt deinen Drucker. Das setzt Bauraum, Z-Endstop-Typ und LED-Option automatisch: RF1000 hat einen mechanischen Endschalter und keine LED, RF2000 und RF2000 v2 haben eine Lichtschranke.</p><p>Beim RF2000 v2 steht im Bed-Mesh <code>algorithm: bicubic</code> und <code>probe_count: 6,9</code>, sonst <code>lagrange</code> und <code>5,5</code>.</p>'],
+  xmax: ['X max (mm)', '<p>Größe des Druckbereichs in X-Richtung in Millimetern. Wird bei Modellwechsel automatisch gesetzt und ist der größte anfahrbare X-Wert (<code>position_max</code>).</p>'],
+  ymax: ['Y max (mm)', '<p>Größe des Druckbereichs in Y-Richtung in Millimetern. Das Bed-Mesh misst bis 25 mm unter diesem Wert, damit der Sensor nicht über das Bett hinausfährt.</p>'],
+  zmax: ['Z max (mm)', '<p>Maximale Bauhöhe in Millimetern (<code>position_max</code> der Z-Achse).</p>'],
+  led: ['LED vorhanden', '<p>Aktiviert die LED-Ausgabe in der Konfiguration. Der RF1000 hat keine LED, deshalb ist die Option dort gesperrt.</p>'],
+  fil: ['Filamentdurchmesser', '<p>Durchmesser deines Filaments: 1,75 mm, 2,85 mm oder 3,00 mm. Er wird als <code>filament_diameter</code> in die Konfiguration übernommen und sollte zum Hotend passen.</p>'],
+  ftype: ['Filament-Typ', '<p>Wählt Standardtemperaturen: <b>PLA</b> 195 °C / Bett 65 °C, <b>PETG</b> 220 °C / Bett 75 °C. Bei „Manuell“ trägst du eigene Werte ein. Ändern sich die Temperaturen von Hand, springt die Auswahl selbst auf „Manuell“.</p><p>Die Werte sind die Vorgabe für den Düsenversatz-Test <code>OFFSET_TEST</code> (nur bei Dual).</p>'],
+  ftemp: ['Düsentemperatur (°C)', '<p>Temperatur, auf die beide Düsen beim <code>OFFSET_TEST</code> aufgeheizt werden. Sie lässt sich beim Aufruf mit <code>TEMP0</code>, <code>TEMP1</code> oder <code>TEMP</code> überschreiben.</p>'],
+  fbed: ['Betttemperatur (°C)', '<p>Temperatur des Betts beim <code>OFFSET_TEST</code>. Beim Aufruf mit <code>BED_TEMP</code> überschreibbar.</p>'],
+  nozzle: ['Düse (mm)', '<p>Durchmesser der eingebauten Düse, zum Beispiel 0,4 mm. Er bestimmt die mögliche Linienbreite und Schichthöhe. Wählbar sind 0,2 bis 0,8 mm in 0,1er-Schritten. Bei Dual richtet sich der Testdruck <code>OFFSET_TEST</code> danach (Schichthöhe halber Düsendurchmesser, Linienbreite 1,25 × Düse).</p>'],
+  esteps: ['Extruder Steps pro mm', '<p>So viele Schritte macht der Extrudermotor pro Millimeter Filament. Klipper braucht stattdessen <code>rotation_distance</code>, der Creator rechnet es um: 200 Vollschritte × 32 Mikroschritte ÷ Steps/mm.</p><p>Den Wert findest du in der alten Firmware (Marlin: <code>M92 E…</code>) oder durch Kalibrieren. 280 Steps/mm ergeben 22,86.</p>'],
+  offx: ['offset_x (mm)', '<p>Versatz der zweiten Düse in X. Klipper addiert den Wert zu den Koordinaten: Liegt Düse 2 rechts von Düse 1, ist er negativ.</p>'],
+  offy: ['offset_y (mm)', '<p>Versatz der zweiten Düse in Y. Gleiche Logik wie bei X: Klipper addiert den Wert zu den Koordinaten.</p>'],
+  serial: ['MCU serial', '<p>Pfad, unter dem der Pi das Druckerboard findet. Du kannst ihn auf dem Pi mit <code>ls /dev/serial/by-id/</code> anzeigen lassen. Ist nichts zu sehen, prüfe das USB-Kabel.</p>'],
+  zpin: ['Endstop-Pin', '<p>Anschluss des Z-Endstops am Board. Er ist fest vorgegeben und nicht änderbar.</p>'],
+  zmin: ['Z min / Überfahrweg (mm)', '<p>Wie weit Z unter 0 weiterfahren darf (<code>position_min</code>). <code>position_endstop</code> ist 0. Beim Endschalter (RF1000) sind es 0,8 mm, bei der Lichtschranke (RF2000, RF2000 v2) 1,2 mm.</p><p>Zu klein: Z erreicht das Bett nicht. Zu groß: die Düse drückt ins Bett.</p>'],
+  zinv: ['Pin invertieren', '<p>Ein <code>!</code> vor dem Pin kehrt dessen Logik um. Gib im Terminal <code>QUERY_ENDSTOPS</code> ein, solange nichts den Endstop auslöst. Steht dort <code>triggered</code>, ist der Pin falsch herum: Haken umschalten.</p><p>Drücke danach den Endschalter bzw. unterbrich die Lichtschranke von Hand und prüfe, dass sich der Status ändert. Erst dann Z homen.</p>'],
+  guard: ['Schutz einbinden', '<p>Bindet das Modul <code>rf1000_pressure_guard.py</code> aus dem Klipper-Fork ein. Es wertet den DMS aus. Notfall-Pause und Flow-Kompensation lassen sich danach getrennt aktivieren.</p>'],
+  eon: ['Notfall-Pause verwenden', '<p>Pausiert den Druck, wenn die Kraft an der Düse zu groß wird, zum Beispiel bei einer Verstopfung oder wenn die Düse ins Bett fährt. Abgewählt gilt <code>emergency_min</code> und <code>emergency_max</code> = 0, die Notfall-Pause ist aus.</p>'],
+  emin: ['Pause unter (Digits, negativ)', '<p>Untere Grenze der Kraft, immer ≤ 0. Liegt der Mittelwert darunter, wird pausiert. Werte in der Einheit von <code>LCP_READ</code>. Beide Grenzen 0 = aus.</p>'],
+  emax: ['Pause über (Digits)', '<p>Obere Grenze der Kraft, immer ≥ 0. Liegt der Mittelwert darüber, wird pausiert. Liegt sie über <code>max_abs_force</code>, kann der Bereichsschutz des Sensors zuerst eingreifen.</p>'],
+  esamp: ['Mittelwert über (Messwerte)', '<p>Anzahl der letzten Messwerte, über die gemittelt wird, bevor die Grenzen geprüft werden. Bei etwa 16 Messungen pro Sekunde sind 5 Werte rund 0,3 Sekunden.</p><p><b>Mehr Werte:</b> ruhiger, aber später. <b>Weniger Werte:</b> schneller, aber anfälliger für einzelne Ausreißer.</p>'],
+  fon: ['Flow-Kompensation verwenden', '<p>Passt Extrusion und Vorschub an, wenn der Druck an der Düse steigt. Unter „Flow ab“ passiert nichts, über „Volle Wirkung bei“ gilt die volle Korrektur, dazwischen steigt sie linear. Abgewählt stehen Flow und Vorschub auf 0 %.</p>'],
+  fmin: ['Flow ab (Digits)', '<p>Kraft, ab der die Korrektur beginnt. Darunter passiert nichts. Es zählt der Betrag, die Reihenfolge von „ab“ und „volle Wirkung“ ordnet die Seite selbst.</p>'],
+  fmax: ['Volle Wirkung bei (Digits)', '<p>Kraft, bei der die Korrektur voll wirkt. Zwischen „Flow ab“ und diesem Wert steigt sie linear an.</p>'],
+  fpct: ['Extrusion bei voller Wirkung (%)', '<p>Änderung der Materialmenge bei voller Wirkung, von −99 bis 99. Beispiel +10 = 10 % mehr Material.</p>'],
+  vpct: ['Vorschub bei voller Wirkung (%)', '<p>Änderung der Geschwindigkeit bei voller Wirkung, von −90 bis 99. Beispiel −20 = 20 % langsamer.</p>'],
+  fminz: ['Korrektur erst ab Z (mm)', '<p>Die Korrektur greift erst über dieser Z-Höhe, damit die ersten Schichten unberührt bleiben.</p>'],
+  digits: ['Kurve „Digits“', '<p>Zeigt die Kraft des DMS als Kurve „Digits“ in Mainsail an. Praktisch zum Einstellen der Grenzen, weil du die Werte beim Drucken live siehst.</p>']
+};
+(function () {
+  const dlg = document.createElement('dialog');
+  dlg.id = 'infoDlg';
+  dlg.innerHTML = '<h3></h3><div class="ibody"></div><form method="dialog"><button>Schließen</button></form>';
+  document.body.appendChild(dlg);
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+  // Im Forum (ohne Modal): Klick daneben oder Esc schließt das Popup
+  document.addEventListener('click', e => {
+    if (dlg.open && !dlg.contains(e.target) && !e.target.classList.contains('ibtn')) dlg.close();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && dlg.open) dlg.close(); });
+  Object.keys(INFO).forEach(id => {
+    let el = document.getElementById(id);
+    let host = el ? (el.type === 'checkbox' ? el.closest('label') : document.querySelector('label[for="' + id + '"]')) : null;
+    if (el && !host) {               // Feld ohne eigenes Label (z. B. Modell): Hinweis an die Legende
+      const fs = el.closest('fieldset');
+      host = fs && fs.querySelector('legend');
+    }
+    if (!el) {                       // Radiogruppen (ext, fil): Hinweis an die Legende
+      const r = document.querySelector('input[name="' + id + '"]');
+      host = r && r.closest('fieldset') && r.closest('fieldset').querySelector('legend');
+    }
+    if (!host) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ibtn'; b.textContent = 'i';
+    b.setAttribute('aria-label', 'Info: ' + INFO[id][0]);
+    b.addEventListener('click', e => {
+      e.preventDefault(); e.stopPropagation();
+      dlg.querySelector('h3').textContent = INFO[id][0];
+      dlg.querySelector('.ibody').innerHTML = INFO[id][1];
+      const emb = document.documentElement.classList.contains('embed');
+      if (emb) dlg.show(); else dlg.showModal();
+      if (emb) {
+        // Im Forum ist der Rahmen so hoch wie die ganze Seite: Popup neben das „i“ setzen
+        const r = b.getBoundingClientRect();
+        dlg.style.position = 'absolute'; dlg.style.margin = '0';
+        dlg.style.top = (r.bottom + window.scrollY + 8) + 'px';
+        dlg.style.left = Math.max(8, Math.min(r.left, window.innerWidth - dlg.offsetWidth - 8)) + 'px';
+      }
+    });
+    host.appendChild(b);
+  });
+})();
+$('eon').addEventListener('change', () => { $('eFields').hidden = !$('eon').checked; });
+$('fon').addEventListener('change', () => { $('fFields').hidden = !$('fon').checked; });
 document.querySelectorAll('input:not([name=ext]), select').forEach(e => {
   e.addEventListener('input', render); e.addEventListener('change', render);
 });
@@ -1188,9 +1589,56 @@ $('dl').addEventListener('click', () => download(current + '.cfg', files[current
 $('dlAll').addEventListener('click', () => {
   download('printer.cfg', files.printer);
   setTimeout(() => download('macros.cfg', files.macros), 300);
+  if (files.offset_test) setTimeout(() => download('offset_test.cfg', files.offset_test), 600);
 });
 
-applyModel(); render();
+// Seiten (Schritte): Zurück / Weiter und Leiste oben
+const PAGES = Array.from(document.querySelectorAll('[data-page]'));
+const STEPS = Array.from(document.querySelectorAll('.step'));
+let page = 0;                       // data-page-Nummer der gezeigten Seite
+const RESULT = 5, FILAMENT = 2;     // Ergebnis-Seite; Filament-Seite gibt es nur bei Dual
+const seq = () => PAGES.map((_, i) => i).filter(i => i !== FILAMENT || radio('ext') === 'dual');
+function updateSteps() {
+  const q = seq();
+  STEPS.forEach(b => {
+    const id = +b.dataset.go;
+    b.hidden = !q.includes(id);
+    const n = b.querySelector('b'); if (n) n.textContent = q.indexOf(id) + 1;
+  });
+}
+function showPage(n, scroll = true) {
+  const q = seq();
+  if (!q.includes(n)) n = q[Math.min(q.length - 1, Math.max(0, n))];
+  page = n;
+  const pos = q.indexOf(page);
+  PAGES.forEach((p, i) => { p.hidden = i !== page; });
+  updateSteps();
+  STEPS.forEach(b => {
+    const id = +b.dataset.go;
+    b.setAttribute('aria-selected', id === page);
+    b.classList.toggle('done', q.indexOf(id) !== -1 && q.indexOf(id) < pos);
+  });
+  $('prevBtn').disabled = pos === 0;
+  $('nextBtn').hidden = pos === q.length - 1;
+  $('nextBtn').textContent = q[pos + 1] === RESULT ? 'Zum Ergebnis' : 'Weiter';
+  if (page === RESULT) render(true);
+  try { history.replaceState(null, '', '#' + (pos + 1)); } catch (e) {}
+  if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+STEPS.forEach(b => b.addEventListener('click', () => showPage(+b.dataset.go)));
+$('prevBtn').addEventListener('click', () => { const q = seq(); showPage(q[Math.max(0, q.indexOf(page) - 1)]); });
+$('nextBtn').addEventListener('click', () => { const q = seq(); showPage(q[Math.min(q.length - 1, q.indexOf(page) + 1)]); });
+
+applyModel(); render(); updateSteps();
+showPage(seq()[Math.max(0, (parseInt(location.hash.slice(1), 10) || 1) - 1)] ?? 0, false);
+
+// Einbettung im Forum (iframe): Header ausblenden und Höhe an die Elternseite melden
+if (window.self !== window.top) {
+  document.documentElement.classList.add('embed');
+  const sendH = () => parent.postMessage({ ccHeight: document.documentElement.scrollHeight }, '*');
+  new ResizeObserver(sendH).observe(document.body);
+  window.addEventListener('load', sendH);
+}
 </script>
 </body>
 </html>
