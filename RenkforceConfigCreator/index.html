@@ -174,6 +174,10 @@
         <div><label for="ymax">Y max (mm)</label><input type="number" id="ymax" step="1"></div>
         <div><label for="zmax">Z max (mm)</label><input type="number" id="zmax" step="1" value="200"></div>
       </div>
+      <div class="row" style="margin-top:8px">
+        <div><label for="yhome">Y-Home vor dem Bett (mm)</label><input type="number" id="yhome" step="1" min="0"></div>
+        <div><label for="yfront">Y frei vorne für Prime Line (mm)</label><input type="number" id="yfront" step="1" min="0"></div>
+      </div>
       <label class="check" id="ledRow"><input type="checkbox" id="led"> LED vorhanden</label>
       <div class="hint">Maße werden bei Modellwechsel automatisch gesetzt und lassen sich danach ändern. Der RF1000 hat keine LED.</div>
     </fieldset>
@@ -508,9 +512,13 @@
 
 <script>
 const SIZES = {
-  single: { rf1000: [240, 240, false], rf2000: [240, 240, true], rf2000v2: [245, 285, true] },
-  dual:   { rf1000: [200, 240, false], rf2000: [200, 240, true], rf2000v2: [200, 285, true] }
+  single: { rf1000: [240, 240, false], rf2000: [240, 240, true], rf2000v2: [245, 300, true] },
+  dual:   { rf1000: [200, 240, false], rf2000: [200, 240, true], rf2000v2: [200, 300, true] }
 };
+// Y: Y=0 ist die Vorderkante des Betts. Der Home-Schalter liegt YHOME mm davor (negativ).
+// YFRONT: vorderer Streifen fuer die Prime Line, im Slicer nicht bedruckbar (RF2000 v2: 300 - 285 = 15).
+const YHOME = { rf1000: 20, rf2000: 20, rf2000v2: 10 };
+const YFRONT = { rf1000: 0, rf2000: 0, rf2000v2: 15 };
 // Z-Endstop: RF1000 mechanischer Endschalter, RF2000/RF2000v2 Lichtschranke
 const ZMIN = { rf1000: -0.8, rf2000: -1.2, rf2000v2: -1.2 };
 const NAMES = { rf1000: 'RF1000', rf2000: 'RF2000', rf2000v2: 'RF2000 v2' };
@@ -528,6 +536,7 @@ function applyModel() {
   $('xmax').value = x; $('ymax').value = y; $('led').checked = led;
   $('ledRow').hidden = m === 'rf1000';
   $('zmin').value = ZMIN[m];
+  $('yhome').value = YHOME[m]; $('yfront').value = YFRONT[m];
   $('zType').textContent = m === 'rf1000' ? 'Endschalter (mechanisch)' : 'Lichtschranke';
   document.querySelectorAll('#modelPics .mp').forEach(p => p.classList.toggle('sel', p.dataset.m === m));
 }
@@ -537,11 +546,12 @@ document.querySelectorAll('#modelPics .mp').forEach(p => p.addEventListener('cli
 
 function state() {
   const dual = radio('ext') === 'dual';
-  const xmax = num('xmax', 200), ymax = num('ymax', 285), zmax = num('zmax', 200);
+  const xmax = num('xmax', 200), ymax = num('ymax', 300), zmax = num('zmax', 200);
   const useOff = dual;
   const eon = $('eon').checked, fon = $('fon').checked;
   return {
     dual, model: NAMES[$('model').value], xmax, ymax, zmax,
+    yhome: Math.max(0, num('yhome', 10)), yfront: Math.max(0, num('yfront', 0)),
     led: $('model').value !== 'rf1000' && $('led').checked, fil: radio('fil'),
     nozzle: num('nozzle', 0.4),
     rot: Math.round(200 * 32 / Math.max(num('esteps', 280), 0.01) * 1000) / 1000,
@@ -689,8 +699,9 @@ enable_pin: PF2
 rotation_distance: 42
 microsteps: 32
 endstop_pin: !PC0
-position_endstop: -5
-position_min: -5
+# Y=0 ist die Vorderkante des Betts, der Home-Schalter liegt ${fmt(s.yhome)} mm davor
+position_endstop: ${fmt(-s.yhome)}
+position_min: ${fmt(-s.yhome)}
 position_max: ${fmt(s.ymax)}
 homing_speed: 35.0
 second_homing_speed: 10.0
@@ -1392,7 +1403,8 @@ function buildOrca(s) {
   const change = s.dual ? 'T[next_extruder]' : 'M600';
   const rows = [
     ['G-Code-Variante (G-code flavor)', 'Klipper'],
-    ['Druckbett-Form', `Rechteckig, ${fmt(s.xmax)} × ${fmt(s.ymax)} mm, Ursprung 0 / 0`],
+    ['Druckbett-Form (Bed shape)', `Rechteckig, ${fmt(s.xmax)} × ${fmt(s.ymax)} mm, Ursprung 0 / 0 (0 / 0 ist die vordere linke Ecke des Betts, gleich wie Y=0 in Klipper)`],
+    ...(s.yfront > 0 ? [['Sperrbereich (Bed exclude area)', `Rechteck von 0 / 0 bis ${fmt(s.xmax)} / ${fmt(s.yfront)} mm (vorderer Streifen für die Prime Line). Druckbar bleiben ${fmt(s.xmax)} × ${fmt(s.ymax - s.yfront)} mm. In Orca: Drucker → Grundlegende Daten → Druckbett-Form → Sperrbereich`]] : []),
     ['Maximale Druckhöhe', `${fmt(s.zmax)} mm`],
     ['Düsendurchmesser', `${fmt(s.nozzle)} mm${s.dual ? ' (bei beiden Extrudern)' : ''}`],
     ['Filamentdurchmesser', `${s.fil} mm`],
@@ -1499,7 +1511,9 @@ const INFO = {
   ext: ['Extruder', '<p><b>Single:</b> ein Extruder mit einem Hotend.</p><p><b>Dual:</b> zwei Extruder. Dann erzeugt der Creator zusätzlich den zweiten Extruder, die Werkzeugwechsel-Makros <code>T0</code>/<code>T1</code> und optional den Düsenversatz.</p>'],
   model: ['Modell', '<p>Wählt deinen Drucker. Das setzt Bauraum, Z-Endstop-Typ und LED-Option automatisch: RF1000 hat einen mechanischen Endschalter und keine LED, RF2000 und RF2000 v2 haben eine Lichtschranke.</p><p>Beim RF2000 v2 steht im Bed-Mesh <code>algorithm: bicubic</code> und <code>probe_count: 6,9</code>, sonst <code>lagrange</code> und <code>5,5</code>.</p>'],
   xmax: ['X max (mm)', '<p>Größe des Druckbereichs in X-Richtung in Millimetern. Wird bei Modellwechsel automatisch gesetzt und ist der größte anfahrbare X-Wert (<code>position_max</code>).</p>'],
-  ymax: ['Y max (mm)', '<p>Größe des Druckbereichs in Y-Richtung in Millimetern. Das Bed-Mesh misst bis 25 mm unter diesem Wert, damit der Sensor nicht über das Bett hinausfährt.</p>'],
+  ymax: ['Y max (mm)', '<p>Tiefe des Betts in Y-Richtung, gemessen ab der Vorderkante (Y=0) bis zum größten anfahrbaren Wert (<code>position_max</code>). Beim RF2000 v2 sind das 300 mm. Das Bed-Mesh misst bis 25 mm unter diesem Wert, damit der Sensor nicht über das Bett hinausfährt.</p>'],
+  yhome: ['Y-Home vor dem Bett (mm)', '<p>Y=0 ist die <b>Vorderkante des Betts</b>. Der Home-Schalter der Y-Achse liegt davor: beim RF2000 v2 10 mm, beim RF1000 und RF2000 20 mm. Daraus wird <code>position_endstop</code> und <code>position_min</code> = −Wert.</p><p>Stimmt der Wert nicht, sind alle Y-Positionen verschoben. Zum Prüfen nach dem Homing Y auf 0 fahren: die Düse muss genau an der Vorderkante des Betts stehen.</p>'],
+  yfront: ['Y frei vorne für Prime Line (mm)', '<p>Vorderer Streifen des Betts, der im Slicer gesperrt wird, weil dort die Prime Line gezogen wird. Beim RF2000 v2 sind es 15 mm: 300 mm Bett, davon 285 mm bedruckbar. Die Prime Line in <code>PRINT_START</code> liegt bei Y=3.</p><p>Der Wert erscheint in der Orca-Anleitung als Sperrbereich (Bed exclude area). 0 = nichts sperren.</p>'],
   zmax: ['Z max (mm)', '<p>Maximale Bauhöhe in Millimetern (<code>position_max</code> der Z-Achse).</p>'],
   led: ['LED vorhanden', '<p>Aktiviert die LED-Ausgabe in der Konfiguration. Der RF1000 hat keine LED, deshalb ist die Option dort gesperrt.</p>'],
   fil: ['Filamentdurchmesser', '<p>Durchmesser deines Filaments: 1,75 mm, 2,85 mm oder 3,00 mm. Er wird als <code>filament_diameter</code> in die Konfiguration übernommen und sollte zum Hotend passen.</p>'],
