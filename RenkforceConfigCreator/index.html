@@ -288,7 +288,7 @@
       <div id="guardFields">
         <div class="hint" style="margin:0 0 6px">Braucht das Modul <code>rf1000_pressure_guard.py</code> aus dem Klipper-Fork.
           Alle Werte sind in der Einheit von <code>LCP_READ</code> (nicht in alten Firmware-Digits). Notfall-Pause und Flow-Kompensation lassen sich getrennt abwählen.
-          Hinweise zum Einstellen stehen auf der Seite „Anleitung“ (Schritt 7).</div>
+          Hinweise zum Einstellen stehen auf der Seite „Anleitung“.</div>
         <fieldset style="margin:10px 0 0">
           <legend>Notfall-Pause</legend>
           <label class="check"><input type="checkbox" id="eon" checked> Notfall-Pause verwenden</label>
@@ -359,8 +359,8 @@
 
   <section class="card info page" data-page="6" hidden>
     <h2>DMS (Dehnungsmesstreifen) einstellen und bedienen</h2>
-    <p>Der DMS (Dehnungsmesstreifen) misst, wie stark die Düse gegen das Bett oder gegen das Filament drückt. Daraus entstehen drei Funktionen:
-       Sense Offset (Z-Korrektur in der ersten Schicht), Notfall-Pause und Flow-Kompensation. Die beiden letzten sind optional (Schritt 5 „DMS“).</p>
+    <p>Der DMS (Dehnungsmesstreifen) misst, wie stark die Düse gegen das Bett oder gegen das Filament drückt. Daraus entstehen drei Funktionen (dazu optional die Heißmessung des Z-Offsets):
+       Sense Offset (Z-Korrektur in der ersten Schicht), Notfall-Pause und Flow-Kompensation. Die beiden letzten sind optional (Schritt „DMS“).</p>
 
     <details open>
       <summary>1. Einbau in Kürze</summary>
@@ -368,7 +368,7 @@
         <ol>
           <li>Datei <code>rf1000_pressure_guard.py</code> nach <code>~/klipper/klippy/extras/</code> auf dem Raspberry Pi kopieren
               (liegt im Klipper-Fork <code>Dennis02121978/klipper</code>).</li>
-          <li>In Schritt 5 „DMS“ die Funktion aktivieren und die neu erzeugte <code>printer.cfg</code> verwenden. Die Reihenfolge ist wichtig:
+          <li>Im Schritt „DMS“ die Funktion aktivieren und die neu erzeugte <code>printer.cfg</code> verwenden. Die Reihenfolge ist wichtig:
               <code>[rf1000_pressure_guard]</code> steht vor <code>[temperature_sensor Digits]</code>.</li>
           <li><b>Dienst neu starten:</b> <code>sudo systemctl restart klipper</code>. Ein <code>RESTART</code> im Mainsail lädt bereits
               geladene Python-Module nicht neu und führt bei geänderten Modulen zu Fehlern.</li>
@@ -477,6 +477,7 @@
           <tr><td><code>RF_EMERGENCY_PAUSE</code></td><td>Grenzen anzeigen. Mit <code>MIN=</code> und <code>MAX=</code> ändern, beide 0 schaltet aus.</td></tr>
           <tr><td><code>RF_FLOW_COMP</code></td><td>Einstellung anzeigen. Mit <code>MIN= MAX= FLOW= FEED=</code> ändern.</td></tr>
           <tr><td><code>Z_SENSE_OFFSET</code></td><td>Schaltet den Sense Offset ein und setzt ihn auf 0. Optional <code>FORCE_THRESHOLD=</code> und <code>MAX_Z_OFFSET=</code>. Steht schon in <code>PRINT_START</code>.</td></tr>
+          <tr><td><code>HOT_Z_PROBE</code></td><td>Heißmessung des Z-Offsets (nur wenn im Creator aktiviert, siehe Abschnitt 10). <code>MIN=</code> und <code>MAX=</code> geben den Bereich des Zufallspunkts an.</td></tr>
         </table>
         <p>Änderungen mit <code>RF_…</code> gelten nur bis zum nächsten Neustart. Trage gute Werte in <code>printer.cfg</code> ein
            (oder erzeuge die Datei hier neu).</p>
@@ -513,6 +514,45 @@
     <details open>
       <summary>9. Orca Slicer: Einstellungen, Start- und End-G-Code</summary>
       <div class="body" id="orcaBody"></div>
+    </details>
+
+    <details>
+      <summary>10. Z-Offset vor dem Druck (Heißmessung, optional)</summary>
+      <div class="body">
+        <p>Z wird beim Homing kalt gesetzt. Beim Aufheizen dehnt sich das Hotend aus, die Düse steht danach tiefer. Mit der Option im Schritt „Z-Endstop“
+           misst <code>PRINT_START</code> den Unterschied heiß und setzt den Z-Offset nur für diesen Druck.</p>
+        <ol>
+          <li>Nach dem Aufheizen wartet das Makro die eingestellte Zeit (Vorgabe 45 s), damit sich alles ausdehnt.</li>
+          <li><code>HOT_Z_PROBE</code> wählt einen <b>zufälligen Punkt</b> mit X und Y zwischen den eingestellten Werten (Vorgabe 30 bis 50 mm).</li>
+          <li><b>1. Messung</b> mit <code>PROBE</code>: reinigt die Düse, Filamentreste werden gegen das Bett gedrückt. Das Ergebnis wird nur angezeigt.</li>
+          <li><b>2. Messung</b> 2 mm weiter in X an einer frischen Stelle. Sie zählt: Offset = Messwert − Meshhöhe an dieser Stelle. Er wird mit <code>SET_GCODE_OFFSET Z=…</code> gesetzt.</li>
+          <li>Danach folgen Prime Line und der Sense Offset, der nur noch den Rest im ersten Layer ausgleicht.</li>
+        </ol>
+        <p><b>Voraussetzungen:</b></p>
+        <ul>
+          <li>Das Mesh wurde wie im Makro <code>bed_calibrate</code> aufgenommen: Z=0 an einem Bezugspunkt, danach das Mesh. Sonst stimmt die Rechnung nicht.</li>
+          <li>Die Düse ist sauber und tropft nicht. Sonst misst der DMS Filament mit.</li>
+          <li>Liegt der Punkt außerhalb des Meshes (<code>mesh_min</code>, Standard Y 50), wird am Mesh-Rand gerechnet.</li>
+        </ul>
+        <p><b>Schutz:</b> Weicht der Offset um mehr als 0,5 mm ab, bricht das Makro mit einer Fehlermeldung ab und fährt die Düse hoch.
+           Beide Messwerte stehen in der Meldung. Weichen sie stark voneinander ab, war die Düse vermutlich verschmutzt.</p>
+        <p>Beim ersten Mal den Drucker beobachten, Hand am Not-Aus. Die Option ist standardmäßig aus.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>11. Y-Nullpunkt und Y-Home prüfen</summary>
+      <div class="body">
+        <p>In Klipper ist <b>Y=0 die Vorderkante des Betts</b>. Der Y-Home-Schalter liegt davor: beim RF2000 v2 10 mm, beim RF1000 und RF2000 20 mm
+           (<code>position_endstop</code> und <code>position_min</code> sind −10 bzw. −20). <code>position_max</code> ist die Betttiefe (RF2000 v2: 300 mm, RF1000 und RF2000: 245 mm).</p>
+        <ol>
+          <li>Nach dem Homing im Terminal <code>G1 Y0 F3000</code> eingeben. Die Düse muss genau an der Vorderkante des Betts stehen.</li>
+          <li>Stimmt es nicht, den Wert „Y-Home vor dem Bett“ im Creator anpassen und die Datei neu erzeugen.</li>
+          <li>Wurde der Y-Nullpunkt geändert, ist das gespeicherte Mesh um diese Strecke verschoben. <b>Mesh neu aufnehmen</b> (<code>BED_MESH_CALIBRATE</code> bzw. <code>bed_calibrate</code>).</li>
+        </ol>
+        <p>Beim RF2000 v2 bleiben vorne 15 mm für die Prime Line frei (285 mm bedruckbar). In Orca wird dieser Streifen als Sperrbereich eingetragen,
+           den passenden Code findest du im Abschnitt Orca Slicer.</p>
+      </div>
     </details>
   </section>
 
