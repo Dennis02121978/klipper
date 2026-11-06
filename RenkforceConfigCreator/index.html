@@ -264,6 +264,19 @@
         Erst dann Z homen.
       </div>
     </fieldset>
+
+    <fieldset>
+      <legend>Z-Offset vor dem Druck (Heißmessung)</legend>
+      <label class="check"><input type="checkbox" id="hp"> Vor jedem Druck heiß mit <code>PROBE</code> messen und Z-Offset setzen</label>
+      <div id="hpFields" hidden>
+        <div class="row">
+          <div><label for="hpmin">Zufallspunkt von (mm, X und Y)</label><input type="number" id="hpmin" step="1" value="30"></div>
+          <div><label for="hpmax">bis (mm, X und Y)</label><input type="number" id="hpmax" step="1" value="50"></div>
+          <div><label for="hpwait">Wartezeit nach dem Aufheizen (s)</label><input type="number" id="hpwait" step="5" min="0" value="45"></div>
+        </div>
+        <div class="hint">Die Düse berührt dabei das Bett. Das Mesh muss wie in <code>bed_calibrate</code> aufgenommen sein (siehe Info-Symbol).</div>
+      </div>
+    </fieldset>
   </section>
 
   <section class="card page" data-page="4" hidden>
@@ -552,6 +565,7 @@ function state() {
   return {
     dual, model: NAMES[$('model').value], xmax, ymax, zmax,
     yhome: Math.max(0, num('yhome', 10)), yfront: Math.max(0, num('yfront', 0)),
+    hp: $('hp').checked, hpmin: num('hpmin', 30), hpmax: Math.max(num('hpmin', 30), num('hpmax', 50)), hpwait: Math.max(0, num('hpwait', 45)),
     led: $('model').value !== 'rf1000' && $('led').checked, fil: radio('fil'),
     nozzle: num('nozzle', 0.4),
     rot: Math.round(200 * 32 / Math.max(num('esteps', 280), 0.01) * 1000) / 1000,
@@ -1163,7 +1177,14 @@ ${led(1, 0, 0)}
 
     M190 S{Betttemperatur}
     M109 S{Extrudertemperatur}
-
+`;
+  if (s.hp) o += `
+    # Heissmessung: Hotend dehnt sich aus, Z-Offset an zufaelligem Punkt (${fmt(s.hpmin)} bis ${fmt(s.hpmax)} mm) neu bestimmen
+    M117 Hotend ausdehnen lassen...
+    G4 P${Math.round(s.hpwait * 1000)}
+    HOT_Z_PROBE MIN=${fmt(s.hpmin)} MAX=${fmt(s.hpmax)}
+`;
+  o += `
     # Sense Offset einschalten (nach G28 noetig, Homing schaltet ihn aus; setzt den Offset auf 0)
     Z_SENSE_OFFSET
 `;
@@ -1367,6 +1388,50 @@ gcode:
     G0 Z2
     Z_OFFSET_SCAN
 `;
+  if (s.hp) o += `
+
+############################
+#  Z-Offset vor dem Druck (Heissmessung)
+############################
+# Ablauf: zufaelligen Punkt im Bereich waehlen, Hoehe des Meshes dort ablesen,
+# mit PROBE heiss messen, Offset = Messwert - Mesh. Gilt nur fuer diesen Druck.
+# Voraussetzung: Das Mesh wurde wie in bed_calibrate aufgenommen (Z=0 am Bezugspunkt, Mesh geladen).
+# Liegt der Punkt ausserhalb des Mesh-Bereichs (mesh_min), wird am Rand gerechnet.
+[gcode_macro HOT_Z_PROBE]
+description: Z-Offset heiss messen (MIN=30 MAX=50: Zufallspunkt, Wartezeit vorher in PRINT_START)
+gcode:
+    {% set lo = params.MIN|default(30)|float %}
+    {% set hi = params.MAX|default(50)|float %}
+    # Klipper kennt kein random: Nachkommastellen der CPU-Zeit als Zufallswert
+    {% set ct = printer.system_stats.cputime * 1000 %}
+    {% set px = lo + (hi - lo) * ((ct|int % 1000) / 1000.0) %}
+    {% set py = lo + (hi - lo) * (((ct * 7.919)|int % 1000) / 1000.0) %}
+    SET_GCODE_OFFSET Z=0
+    G90
+    G1 Z10 F3000
+    G1 X{"%.1f" % px} Y{"%.1f" % py} F6000
+    # Auf Z=1 fahren (unterhalb fade_start, Mesh voll wirksam), dann Meshhoehe ablesen
+    G1 Z1 F1200
+    HOT_Z_PROBE_STEP2
+
+[gcode_macro HOT_Z_PROBE_STEP2]
+gcode:
+    # Differenz toolhead-Z zu G-Code-Z ist der Mesh-Anteil an diesem Punkt
+    {% set mz = printer.toolhead.position.z - printer.gcode_move.gcode_position.z %}
+    PROBE
+    HOT_Z_PROBE_STEP3 MZ={mz}
+
+[gcode_macro HOT_Z_PROBE_STEP3]
+gcode:
+    {% set d = printer["rf1000_load_cell_probe"].last_z_result - params.MZ|float %}
+    {% if d|abs > 0.5 %}
+    G1 Z10 F3000
+    {action_raise_error("HOT_Z_PROBE: Offset %.3f mm ist unplausibel (>0.5). Abbruch. Mesh/Bezugspunkt und Duese pruefen." % d)}
+    {% endif %}
+    SET_GCODE_OFFSET Z={d}
+    RESPOND MSG="Z-Offset durch Heissmessung: {"%.3f" % d} mm (gilt fuer diesen Druck)"
+    G1 Z10 F3000
+`;
   return o;
 }
 
@@ -1441,6 +1506,7 @@ function render(arg) {
     `Filament ${s.fil} mm`, `Düse ${fmt(s.nozzle)} mm`, `Z-Endstop ${s.zpin}`,
     s.guard ? (s.emin || s.emax || s.fpct || s.vpct ? 'DMS: Schutz aktiv' : 'DMS: Modul eingebunden, Grenzen 0') : 'DMS: ohne Schutz'
   ].join(' · '));
+  $('hpFields').hidden = !s.hp;
   $('orcaBody').innerHTML = buildOrca(s);
   files.printer = buildPrinter(s);
   files.macros = buildMacros(s);
@@ -1513,6 +1579,10 @@ const INFO = {
   xmax: ['X max (mm)', '<p>Größe des Druckbereichs in X-Richtung in Millimetern. Wird bei Modellwechsel automatisch gesetzt und ist der größte anfahrbare X-Wert (<code>position_max</code>).</p>'],
   ymax: ['Y max (mm)', '<p>Tiefe des Betts in Y-Richtung, gemessen ab der Vorderkante (Y=0) bis zum größten anfahrbaren Wert (<code>position_max</code>). Beim RF2000 v2 sind das 300 mm. Das Bed-Mesh misst bis 25 mm unter diesem Wert, damit der Sensor nicht über das Bett hinausfährt.</p>'],
   yhome: ['Y-Home vor dem Bett (mm)', '<p>Y=0 ist die <b>Vorderkante des Betts</b>. Der Home-Schalter der Y-Achse liegt davor: beim RF2000 v2 10 mm, beim RF1000 und RF2000 20 mm. Daraus wird <code>position_endstop</code> und <code>position_min</code> = −Wert.</p><p>Stimmt der Wert nicht, sind alle Y-Positionen verschoben. Zum Prüfen nach dem Homing Y auf 0 fahren: die Düse muss genau an der Vorderkante des Betts stehen.</p>'],
+  hp: ['Z-Offset vor dem Druck (Heißmessung)', '<p>Nach dem Homing (kalt) dehnt sich das Hotend beim Aufheizen aus, die Düse steht danach tiefer. Mit dieser Option wartet <code>PRINT_START</code> nach dem Aufheizen, fährt an einen <b>zufälligen Punkt</b> im gewählten Bereich (zum Beispiel X und Y zwischen 30 und 50 mm, bei jedem Druck ein anderer Punkt) und misst dort mit <code>PROBE</code> die Kontakthöhe.</p><p>Offset = Messwert minus Meshhöhe an diesem Punkt. Er wird mit <code>SET_GCODE_OFFSET Z=…</code> gesetzt und gilt nur für diesen Druck. Ist der Wert größer als 0,5 mm, bricht das Makro mit einer Fehlermeldung ab.</p><p><b>Voraussetzung:</b> Das Mesh wurde wie im Makro <code>bed_calibrate</code> aufgenommen (Z=0 an einem Bezugspunkt, danach Mesh). Die Düse berührt das Bett, sie muss sauber sein und darf nicht tropfen. Standardmäßig aus.</p><p><b>Zusammenspiel mit Sense Offset:</b> Der Sense Offset arbeitet danach im ersten Layer nur noch den Rest ab.</p>'],
+  hpmin: ['Zufallspunkt von (mm)', '<p>Kleinster X- und Y-Wert für den Messpunkt. Der Punkt liegt bei jedem Druck zufällig zwischen „von“ und „bis“ in beiden Achsen, damit nicht immer dieselbe Stelle belastet wird. Y unter <code>mesh_min</code> (Standard 50) liegt außerhalb des Meshes, dort wird am Mesh-Rand gerechnet.</p>'],
+  hpmax: ['Zufallspunkt bis (mm)', '<p>Größter X- und Y-Wert für den Messpunkt, siehe „von“.</p>'],
+  hpwait: ['Wartezeit nach dem Aufheizen (s)', '<p>Pause nach dem Aufheizen, damit sich Hotend und Halterung fertig ausdehnen. Mit 0 wird sofort gemessen. 30 bis 60 s sind ein sinnvoller Anfang.</p>'],
   yfront: ['Y frei vorne für Prime Line (mm)', '<p>Vorderer Streifen des Betts, der im Slicer gesperrt wird, weil dort die Prime Line gezogen wird. Beim RF2000 v2 sind es 15 mm: 300 mm Bett, davon 285 mm bedruckbar. Die Prime Line in <code>PRINT_START</code> liegt bei Y=3.</p><p>Der Wert erscheint in der Orca-Anleitung als Sperrbereich (Bed exclude area). 0 = nichts sperren.</p>'],
   zmax: ['Z max (mm)', '<p>Maximale Bauhöhe in Millimetern (<code>position_max</code> der Z-Achse).</p>'],
   led: ['LED vorhanden', '<p>Aktiviert die LED-Ausgabe in der Konfiguration. Der RF1000 hat keine LED, deshalb ist die Option dort gesperrt.</p>'],
