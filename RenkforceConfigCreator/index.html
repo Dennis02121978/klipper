@@ -531,6 +531,7 @@
         <p><b>Voraussetzungen:</b></p>
         <ul>
           <li>Das Mesh wurde wie im Makro <code>bed_calibrate</code> aufgenommen: Z=0 an einem Bezugspunkt, danach das Mesh. Sonst stimmt die Rechnung nicht.</li>
+          <li>Die aktive Düse ist aufgeheizt (Soll und Ist mindestens 170 °C). Ist sie kalt, bricht <code>HOT_Z_PROBE</code> mit einer Fehlermeldung ab und es wird <b>nicht</b> gemessen.</li>
           <li>Die Düse ist sauber und tropft nicht. Sonst misst der DMS Filament mit.</li>
           <li>Liegt der Punkt außerhalb des Meshes (<code>mesh_min</code>, Standard Y 50), wird am Mesh-Rand gerechnet.</li>
         </ul>
@@ -1437,9 +1438,21 @@ gcode:
 # Offset = Messwert - Meshhoehe am 2. Punkt. Gilt nur fuer diesen Druck.
 # Voraussetzung: Das Mesh wurde wie in bed_calibrate aufgenommen (Z=0 am Bezugspunkt, Mesh geladen).
 # Liegt der Punkt ausserhalb des Mesh-Bereichs (mesh_min), wird am Rand gerechnet.
+# Sicherung: PROBE nur mit aufgeheizter aktiver Duese (Soll und Ist mindestens MINTEMP, Standard 170 Grad)
+[gcode_macro _HOT_Z_CHECK]
+gcode:
+    {% set ex = printer.toolhead.extruder %}
+    {% set t = printer[ex].temperature %}
+    {% set tg = printer[ex].target %}
+    {% set mt = params.MINTEMP|default(170)|float %}
+    {% if tg < mt or t < mt - 5 %}
+    {action_raise_error("HOT_Z_PROBE: Extruder %s ist nicht heiss (Ist %.0f, Soll %.0f, mindestens %.0f Grad). PROBE nur mit aufgeheizter Duese." % (ex, t, tg, mt))}
+    {% endif %}
+
 [gcode_macro HOT_Z_PROBE]
 description: Z-Offset heiss messen, 2 Messungen (MIN=30 MAX=50 Zufallspunkt, 2. Messung 2 mm weiter in X)
 gcode:
+    _HOT_Z_CHECK
     {% set lo = params.MIN|default(30)|float %}
     {% set hi = params.MAX|default(50)|float %}
     # Klipper kennt kein random: Nachkommastellen der CPU-Zeit als Zufallswert
@@ -1456,6 +1469,7 @@ gcode:
 # 1. Messung: reinigt die Duese (Filamentreste werden gegen das Bett gedrueckt), Ergebnis wird nur angezeigt
 [gcode_macro HOT_Z_PROBE_STEP2]
 gcode:
+    _HOT_Z_CHECK
     PROBE
     HOT_Z_PROBE_STEP3 X={params.X|float + 2.0} Y={params.Y} Z1={printer["rf1000_load_cell_probe"].last_z_result}
 
@@ -1471,6 +1485,7 @@ gcode:
 gcode:
     # Differenz toolhead-Z zu G-Code-Z ist der Mesh-Anteil an diesem Punkt
     {% set mz = printer.toolhead.position.z - printer.gcode_move.gcode_position.z %}
+    _HOT_Z_CHECK
     PROBE
     HOT_Z_PROBE_STEP5 MZ={mz} Z1={params.Z1}
 
@@ -1634,7 +1649,7 @@ const INFO = {
   xmax: ['X max (mm)', '<p>Größe des Druckbereichs in X-Richtung in Millimetern. Wird bei Modellwechsel automatisch gesetzt und ist der größte anfahrbare X-Wert (<code>position_max</code>).</p>'],
   ymax: ['Y max (mm)', '<p>Tiefe des Betts in Y-Richtung, gemessen ab der Vorderkante (Y=0) bis zum größten anfahrbaren Wert (<code>position_max</code>). Beim RF2000 v2 sind das 300 mm. Das Bed-Mesh misst bis 25 mm unter diesem Wert, damit der Sensor nicht über das Bett hinausfährt.</p>'],
   yhome: ['Y-Home vor dem Bett (mm)', '<p>Y=0 ist die <b>Vorderkante des Betts</b>. Der Home-Schalter der Y-Achse liegt davor: beim RF2000 v2 10 mm, beim RF1000 und RF2000 20 mm. Daraus wird <code>position_endstop</code> und <code>position_min</code> = −Wert.</p><p>Stimmt der Wert nicht, sind alle Y-Positionen verschoben. Zum Prüfen nach dem Homing Y auf 0 fahren: die Düse muss genau an der Vorderkante des Betts stehen.</p>'],
-  hp: ['Z-Offset vor dem Druck (Heißmessung)', '<p>Nach dem Homing (kalt) dehnt sich das Hotend beim Aufheizen aus, die Düse steht danach tiefer. Mit dieser Option wartet <code>PRINT_START</code> nach dem Aufheizen, fährt an einen <b>zufälligen Punkt</b> im gewählten Bereich (zum Beispiel X und Y zwischen 30 und 50 mm, bei jedem Druck ein anderer Punkt) und misst dort mit <code>PROBE</code>. Es wird <b>zweimal</b> gemessen: Die erste Messung reinigt die Düse (war noch Filament dran, wird es abgedrückt), die zweite 2 mm weiter in X an einer frischen Stelle zählt. Beide Werte erscheinen in der Meldung.</p><p>Offset = Messwert minus Meshhöhe an diesem Punkt. Er wird mit <code>SET_GCODE_OFFSET Z=…</code> gesetzt und gilt nur für diesen Druck. Ist der Wert größer als 0,5 mm, bricht das Makro mit einer Fehlermeldung ab.</p><p><b>Voraussetzung:</b> Das Mesh wurde wie im Makro <code>bed_calibrate</code> aufgenommen (Z=0 an einem Bezugspunkt, danach Mesh). Die Düse berührt das Bett, sie muss sauber sein und darf nicht tropfen. Standardmäßig aus.</p><p><b>Zusammenspiel mit Sense Offset:</b> Der Sense Offset arbeitet danach im ersten Layer nur noch den Rest ab.</p>'],
+  hp: ['Z-Offset vor dem Druck (Heißmessung)', '<p>Nach dem Homing (kalt) dehnt sich das Hotend beim Aufheizen aus, die Düse steht danach tiefer. Mit dieser Option wartet <code>PRINT_START</code> nach dem Aufheizen, fährt an einen <b>zufälligen Punkt</b> im gewählten Bereich (zum Beispiel X und Y zwischen 30 und 50 mm, bei jedem Druck ein anderer Punkt) und misst dort mit <code>PROBE</code>. Es wird <b>zweimal</b> gemessen: Die erste Messung reinigt die Düse (war noch Filament dran, wird es abgedrückt), die zweite 2 mm weiter in X an einer frischen Stelle zählt. Beide Werte erscheinen in der Meldung. Ohne aufgeheizte Düse (unter 170 °C) wird nicht gemessen, das Makro bricht ab.</p><p>Offset = Messwert minus Meshhöhe an diesem Punkt. Er wird mit <code>SET_GCODE_OFFSET Z=…</code> gesetzt und gilt nur für diesen Druck. Ist der Wert größer als 0,5 mm, bricht das Makro mit einer Fehlermeldung ab.</p><p><b>Voraussetzung:</b> Das Mesh wurde wie im Makro <code>bed_calibrate</code> aufgenommen (Z=0 an einem Bezugspunkt, danach Mesh). Die Düse berührt das Bett, sie muss sauber sein und darf nicht tropfen. Standardmäßig aus.</p><p><b>Zusammenspiel mit Sense Offset:</b> Der Sense Offset arbeitet danach im ersten Layer nur noch den Rest ab.</p>'],
   hpmin: ['Zufallspunkt von (mm)', '<p>Kleinster X- und Y-Wert für den Messpunkt. Der Punkt liegt bei jedem Druck zufällig zwischen „von“ und „bis“ in beiden Achsen, damit nicht immer dieselbe Stelle belastet wird. Y unter <code>mesh_min</code> (Standard 50) liegt außerhalb des Meshes, dort wird am Mesh-Rand gerechnet.</p>'],
   hpmax: ['Zufallspunkt bis (mm)', '<p>Größter X- und Y-Wert für den Messpunkt, siehe „von“.</p>'],
   hpwait: ['Wartezeit nach dem Aufheizen (s)', '<p>Pause nach dem Aufheizen, damit sich Hotend und Halterung fertig ausdehnen. Mit 0 wird sofort gemessen. 30 bis 60 s sind ein sinnvoller Anfang.</p>'],
