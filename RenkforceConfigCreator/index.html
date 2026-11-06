@@ -1387,7 +1387,7 @@ function addedLines(a, b) {
 // Orca-Slicer-Anleitung: passt sich an Modell, Extruder, Düse und Filament an
 function buildOrca(s) {
   const startCode = s.dual
-    ? 'PRINT_START BED_TEMP=[bed_temperature_initial_layer_single] EXTRUDER_TEMP={nozzle_temperature_initial_layer[initial_extruder]}'
+    ? 'PRINT_START BED_TEMP=[bed_temperature_initial_layer_single] EXTRUDER_TEMP={nozzle_temperature_initial_layer[initial_tool]}'
     : 'PRINT_START BED_TEMP=[bed_temperature_initial_layer_single] EXTRUDER_TEMP=[nozzle_temperature_initial_layer]';
   const change = s.dual ? 'T[next_extruder]' : 'M600';
   const rows = [
@@ -1397,7 +1397,7 @@ function buildOrca(s) {
     ['Düsendurchmesser', `${fmt(s.nozzle)} mm${s.dual ? ' (bei beiden Extrudern)' : ''}`],
     ['Filamentdurchmesser', `${s.fil} mm`],
     ['Anzahl Extruder', s.dual ? '2' : '1'],
-    ['Relative Extruder-Adressierung', 'aus (absolut), passend zu <code>M82</code> in <code>PRINT_START</code>']
+    ['Relative Extruder-Adressierung (Use relative E distances)', 'an. Orca schreibt dann selbst <code>M83</code> nach dem Start-G-Code, das <code>M82</code> aus <code>PRINT_START</code> gilt nur für die Prime Line']
   ];
   const table = '<table><tr><th>Einstellung (Drucker → Allgemein / Extruder)</th><th>Wert</th></tr>' +
     rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('') + '</table>';
