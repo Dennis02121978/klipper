@@ -705,6 +705,9 @@ class MenuManager:
         # reverse container navigation
         self._reverse_navigation = config.getboolean(
             'menu_reverse_navigation', False)
+        # Werte im Editiermodus: True = Taste hoch erhoeht, Taste runter verringert
+        self._reverse_input = config.getboolean(
+            'menu_reverse_input', False)
         # load printer objects
         self.gcode_macro = self.printer.load_object(config, 'gcode_macro')
         # register itself for printer callbacks
@@ -857,7 +860,10 @@ class MenuManager:
             self.timer = 0
             current = container.selected_item()
             if isinstance(current, MenuInput) and current.is_editing():
-                current.dec_value(fast_rate)
+                if self._reverse_input is True:
+                    current.inc_value(fast_rate)
+                else:
+                    current.dec_value(fast_rate)
             else:
                 if self._reverse_navigation is True:
                     container.select_next()  # reverse
@@ -870,7 +876,10 @@ class MenuManager:
             self.timer = 0
             current = container.selected_item()
             if isinstance(current, MenuInput) and current.is_editing():
-                current.inc_value(fast_rate)
+                if self._reverse_input is True:
+                    current.dec_value(fast_rate)
+                else:
+                    current.inc_value(fast_rate)
             else:
                 if self._reverse_navigation is True:
                     container.select_prev()  # reverse
