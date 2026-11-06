@@ -4,6 +4,8 @@
 
 - **Sense Offset:** `PRINT_START` ruft jetzt `Z_SENSE_OFFSET` auf. Vorher blieb das Modul ausgeschaltet, weil Homing es abschaltet und kein Befehl es wieder einschaltet. `max_z_height` steht jetzt in der `printer.cfg`; die Anleitung beschreibt die Regelung genau.
 - **Config Creator:** getrennte Auswahl für Notfall-Pause und Flow-Kompensation, Info-Popups, DMS statt Last-Zelle, Modellbilder, bed_mesh je Modell (RF2000 v2 bicubic 6,9), Düse 0,2 bis 0,8 mm, Dual mit Düsenversatz, Filament-Schritt (PLA/PETG/manuell), Testdruck `OFFSET_TEST` und `NOZZLE_OFFSET_ADJUST` in `offset_test.cfg`, Orca-Slicer-Einstellungen mit Start- und End-G-Code.
+- **Y-Achse:** Y=0 ist die Vorderkante des Betts, der Home-Schalter liegt davor (RF2000 v2: 10 mm, RF1000/RF2000: 20 mm). RF2000 v2: Bett 300 mm, vorne 15 mm frei für die Prime Line (285 mm bedruckbar), RF1000/RF2000: Y max 245 mm. Neue Felder "Y-Home vor dem Bett" und "Y frei vorne"; die Orca-Anleitung nennt den Sperrbereich.
+- **Heißmessung (optional):** `HOT_Z_PROBE` misst nach dem Aufheizen an einem Zufallspunkt (Vorgabe X/Y 30 bis 50 mm) zweimal mit `PROBE` (die zweite Messung 2 mm weiter in X zählt) und setzt den Z-Offset für den Druck. Standardmäßig aus.
 
 ## 2026-11-05: Notfall-Pause, Flow-Kompensation und Digits-Kurve
 
