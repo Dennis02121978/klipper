@@ -388,8 +388,8 @@
           <li><b>Kurve beobachten:</b> Mit <code>Digits</code> in Mainsail (Temperatur-Diagramm, Einheit dort fest „°C“, gemeint ist die Kraft)
               einen normalen, guten Druck mitverfolgen. Notiere dir den höchsten und den niedrigsten Wert im sauberen Betrieb.</li>
           <li><b>Fehlerfall messen:</b> Wie hoch geht der Wert bei Düsenverstopfung oder wenn die Düse in das Bett drückt? Das ist deine Obergrenze.</li>
-          <li><b>Rahmen:</b> Die Grenzen müssen im Messbereich liegen. In der Standardkonfiguration ist das <code>max_abs_force: 5000</code>.
-              Liegt <code>emergency_max</code> darüber, kann der Bereichsschutz des Sensors zuerst eingreifen.</li>
+          <li><b>Rahmen:</b> Die Grenzen müssen im Messbereich liegen. <code>max_abs_force</code> (Standard 5000) bestimmt die Messkraft beim <code>PROBE</code>.
+              Der Bereichsschutz des Sensors ist getrennt davon mit <code>adc_max_abs_force</code> (Standard im Generator 8000) einstellbar. Liegt <code>emergency_max</code> darüber, stoppt Klipper mit „ADC out of range“, bevor die Pause greift.</li>
         </ol>
       </div>
     </details>
@@ -505,6 +505,7 @@
               oder der Dienst wurde nicht komplett neu gestartet (nur RESTART). <code>sudo systemctl restart klipper</code>.</td></tr>
           <tr><td>Digits-Kurve zeigt „°C“</td><td>Mainsail schreibt die Einheit bei Temperatursensoren fest. Gemeint ist die Kraft.</td></tr>
           <tr><td>Digits-Kurve bewegt sich nur etwa einmal pro Sekunde</td><td>Mainsail fragt so oft ab. Für schnelle Werte <code>LCP_READ</code> verwenden.</td></tr>
+          <tr><td>Klipper stoppt (Shutdown) statt zu pausieren: <code>ADC (ADS1100) out of range</code></td><td>Die Kraft ist über den Bereichsschutz des Sensors gestiegen (<code>max_abs_force</code>, früher 5000), bevor die Notfall-Pause greifen konnte. In <code>[rf1000_load_cell_probe]</code> <code>adc_max_abs_force: 8000</code> eintragen (Modul aus dem Fork, Dienst neu starten). Die Grenzen der Notfall-Pause müssen darunter liegen. Mit der Einstellung 8000 bleibt es unter dem Messbereich des Sensors (Kalibrierwert 8500).</td></tr>
           <tr><td>Keine Pause trotz Überschreitung</td><td>Es wird nicht gedruckt, Achsen nicht referenziert, oder beide Grenzen stehen auf 0.</td></tr>
           <tr><td>Pause löst zu oft aus</td><td>Grenzen zu eng oder <code>emergency_samples</code> zu klein.</td></tr>
         </table>
@@ -878,6 +879,9 @@ ${guardBlock(s)}[rf1000_load_cell_probe]
 adc: load_cell:None
 adc_rate: 16
 max_abs_force: 5000
+# Bereichsschutz des ADC: Shutdown erst oberhalb dieses Werts. Muss ueber den Grenzen der Notfall-Pause liegen,
+# sonst stoppt Klipper (ADC out of range) statt zu pausieren. Messkraft beim PROBE bleibt durch max_abs_force bestimmt.
+adc_max_abs_force: 8000
 noise_level = 1.5
 force_calibration = 8500
 stiffness = 6200
@@ -1606,6 +1610,7 @@ function render(arg) {
   const notes = [];
   if (s.fil !== '1.75') notes.push(`Prime Line in PRINT_START auf ${s.fil} mm Filament umgerechnet. Retract-Längen bei Bedarf selbst anpassen.`);
   if (s.dual) notes.push(`Düsenversatz: X ${fmt(s.offx)} mm, Y ${fmt(s.offy)} mm. Die Datei <code>offset_test.cfg</code> liegt neben der printer.cfg (wird dort eingebunden). Zum Prüfen <code>OFFSET_TEST</code> ausführen (Vorgabe ${fmt(s.ftemp)} °C, Bett ${fmt(s.fbed)} °C), alternativ mit <code>MATERIAL=PLA</code>, <code>MATERIAL=PETG</code> oder manuell mit <code>BED_TEMP=… TEMP0=… TEMP1=…</code>. Danach mit <code>NOZZLE_OFFSET_ADJUST X=… Y=…</code> korrigieren.`);
+  notes.push('Die Option <code>adc_max_abs_force</code> in <code>[rf1000_load_cell_probe]</code> braucht die aktuelle Datei <code>rf1000_load_cell_probe.py</code> aus dem Klipper-Fork (<code>klippy/extras/</code>). Sonst meldet Klipper „Option ist nicht gültig“. Dienst danach mit <code>sudo systemctl restart klipper</code> neu starten.');
   if (s.guard) {
     notes.push('Das Modul <code>rf1000_pressure_guard.py</code> muss in <code>klippy/extras/</code> liegen, sonst meldet Klipper „Section rf1000_pressure_guard is not a valid config section“. Nach dem Kopieren den Dienst neu starten (<code>sudo systemctl restart klipper</code>), ein RESTART im Mainsail reicht nicht.');
     if (!s.emin && !s.emax) notes.push('Notfall-Pause ist aus (beide Grenzen 0).');
@@ -1671,7 +1676,7 @@ const INFO = {
   guard: ['Schutz einbinden', '<p>Bindet das Modul <code>rf1000_pressure_guard.py</code> aus dem Klipper-Fork ein. Es wertet den DMS aus. Notfall-Pause und Flow-Kompensation lassen sich danach getrennt aktivieren.</p>'],
   eon: ['Notfall-Pause verwenden', '<p>Pausiert den Druck, wenn die Kraft an der Düse zu groß wird, zum Beispiel bei einer Verstopfung oder wenn die Düse ins Bett fährt. Abgewählt gilt <code>emergency_min</code> und <code>emergency_max</code> = 0, die Notfall-Pause ist aus.</p>'],
   emin: ['Pause unter (Digits, negativ)', '<p>Untere Grenze der Kraft, immer ≤ 0. Liegt der Mittelwert darunter, wird pausiert. Werte in der Einheit von <code>LCP_READ</code>. Beide Grenzen 0 = aus.</p>'],
-  emax: ['Pause über (Digits)', '<p>Obere Grenze der Kraft, immer ≥ 0. Liegt der Mittelwert darüber, wird pausiert. Liegt sie über <code>max_abs_force</code>, kann der Bereichsschutz des Sensors zuerst eingreifen.</p>'],
+  emax: ['Pause über (Digits)', '<p>Obere Grenze der Kraft, immer ≥ 0. Liegt der Mittelwert darüber, wird pausiert. Liegt sie über <code>adc_max_abs_force</code> (Generator: 8000), stoppt Klipper mit „ADC out of range“, bevor die Pause greift.</p>'],
   esamp: ['Mittelwert über (Messwerte)', '<p>Anzahl der letzten Messwerte, über die gemittelt wird, bevor die Grenzen geprüft werden. Bei etwa 16 Messungen pro Sekunde sind 5 Werte rund 0,3 Sekunden.</p><p><b>Mehr Werte:</b> ruhiger, aber später. <b>Weniger Werte:</b> schneller, aber anfälliger für einzelne Ausreißer.</p>'],
   fon: ['Flow-Kompensation verwenden', '<p>Passt Extrusion und Vorschub an, wenn der Druck an der Düse steigt. Unter „Flow ab“ passiert nichts, über „Volle Wirkung bei“ gilt die volle Korrektur, dazwischen steigt sie linear. Abgewählt stehen Flow und Vorschub auf 0 %.</p>'],
   fmin: ['Flow ab (Digits)', '<p>Kraft, ab der die Korrektur beginnt. Darunter passiert nichts. Es zählt der Betrag, die Reihenfolge von „ab“ und „volle Wirkung“ ordnet die Seite selbst.</p>'],

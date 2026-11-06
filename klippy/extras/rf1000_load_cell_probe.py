@@ -82,6 +82,12 @@ class LoadCellProbe:
 
         # Maximum acceptable force
         self._max_abs_force = config.getfloat("max_abs_force", above=0.0)
+        # Bereichsschutz des ADC (Shutdown bei Ueberschreitung). Getrennt von max_abs_force,
+        # das die Messkraft beim PROBE bestimmt. Muss groesser sein als die Grenzen der Notfall-Pause,
+        # sonst gibt es vorher einen Shutdown statt einer Pause.
+        self._adc_max_abs_force = config.getfloat(
+            "adc_max_abs_force", self._max_abs_force, above=0.0
+        )
 
         # Stiffness/"spring constant", i.e. force per distance
         # Default value is a safe value resulting in very small step sizes.
@@ -140,7 +146,7 @@ class LoadCellProbe:
         self._force_callbacks = []
 
         # subscribe to ADC callback
-        max_val = self._max_abs_force / self._force_calibration
+        max_val = max(self._adc_max_abs_force, self._max_abs_force) / self._force_calibration
         self._mcu_adc.setup_minmax(self._report_time, 1, -max_val, max_val)
         self._mcu_adc.setup_adc_callback(self._report_time, self._adc_callback)
 
