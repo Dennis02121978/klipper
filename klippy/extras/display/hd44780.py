@@ -116,6 +116,22 @@ class HD44780:
             data = glyph_data.get('icon5x8')
             if data is not None:
                 self.icons[glyph_name] = data
+    # Deutsche Zeichen auf die Codes im Zeichen-ROM (A00) abbilden, wie die
+    # RF-Repetier-Firmware (uilang.h): ae=0xE1, oe=0xEF, ue=0xF5, ss=0xE2
+    TEXT_MAP = {u'\u00e4': b'\xe1', u'\u00f6': b'\xef', u'\u00fc': b'\xf5',
+                u'\u00df': b'\xe2', u'\u00b0': b'\xdf', u'\u00c4': b'Ae',
+                u'\u00d6': b'Oe', u'\u00dc': b'Ue', u'\u00b5': b'\xe4'}
+    def encode_text(self, text):
+        out = bytearray()
+        for c in text:
+            m = self.TEXT_MAP.get(c)
+            if m is not None:
+                out += m
+            elif ord(c) < 0x80:
+                out.append(ord(c))
+            else:
+                out.append(ord('?'))
+        return bytes(out)
     def write_glyph(self, x, y, glyph_name):
         data = self.icons.get(glyph_name)
         if data is not None:

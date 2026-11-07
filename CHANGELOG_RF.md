@@ -1,5 +1,11 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-07 (3): Display und Menü wie in der RF-Firmware
+
+- **`config/rf_display.cfg`:** Startseiten und Menü wie in der RF-Repetier-Firmware (deutsche Texte aus `uilang.h`), Einstellungen werden wie im EEPROM in `rf_variables.cfg` gespeichert. Siehe [DISPLAY_MENU.md](DISPLAY_MENU.md).
+- **Display:** Umlaute, °, µ und ß über das Zeichen-ROM des HD44780. Neue Option `menu_pages`: hoch/runter blättern außerhalb des Menüs durch die Seiten.
+- **Sense Offset:** `SET_Z_SENSE_OFFSET` setzt Schwelle und Obergrenze, ohne einzuschalten.
+
 ## 2026-11-07 (2): Sense Offset im Terminal, Display-Anzeige korrigiert
 
 - **Sense Offset:** Meldungen im Terminal, wenn der Offset um `report_step` (Standard 0,02 mm) steigt und wenn `max_z_offset` erreicht ist. Nach dem ersten Layer folgt das Ergebnis mit höchster und mittlerer Kraft und der Zahl der Überschreitungen. `Z_SENSE_OFFSET QUERY=1` zeigt den Stand.

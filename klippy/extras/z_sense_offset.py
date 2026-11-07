@@ -81,6 +81,9 @@ class SensingZOffset:
         self.gcode.register_command('Z_SENSE_OFFSET',
             self.Z_SENSE_OFFSET,
             desc=self.cmd_Z_SENSE_OFFSET_help)
+        self.gcode.register_command('SET_Z_SENSE_OFFSET',
+            self.cmd_SET_Z_SENSE_OFFSET,
+            desc=self.cmd_SET_Z_SENSE_OFFSET_help)
 
         # Sensor type for a [temperature_sensor] curve in Mainsail
         pheaters = self.printer.load_object(config, 'heaters')
@@ -133,6 +136,19 @@ class SensingZOffset:
                 self.force_max, self.force_sum / self.n_samples,
                 self.n_over, self.n_samples)
         return txt
+
+    cmd_SET_Z_SENSE_OFFSET_help = "Set force threshold and max offset " \
+            "(also the defaults for Z_SENSE_OFFSET) without switching on"
+
+    def cmd_SET_Z_SENSE_OFFSET(self, gcmd):
+        self.force_threshold_default = gcmd.get_int("FORCE_THRESHOLD",
+            self.force_threshold_default, minval=1)
+        self.max_z_offset_default = gcmd.get_float("MAX_Z_OFFSET",
+            self.max_z_offset_default, minval=0.)
+        self.force_threshold = self.force_threshold_default
+        self.max_z_offset = self.max_z_offset_default
+        gcmd.respond_info("Sense Offset: Schwelle %d, max %.3f mm"
+                          % (self.force_threshold, self.max_z_offset))
 
     def Z_SENSE_OFFSET(self, gcmd):
         if gcmd.get_int("QUERY", 0, minval=0, maxval=1):

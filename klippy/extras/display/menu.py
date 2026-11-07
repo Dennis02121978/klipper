@@ -708,6 +708,11 @@ class MenuManager:
         # Werte im Editiermodus: True = Taste hoch erhoeht, Taste runter verringert
         self._reverse_input = config.getboolean(
             'menu_reverse_input', False)
+        # Startanzeige: Seiten (display_data-Gruppen), die ausserhalb des
+        # Menues mit hoch/runter durchgeblaettert werden (wie Repetier)
+        self._pages = [p.strip() for p in config.get(
+            'menu_pages', '').split(',') if p.strip()]
+        self._page = 0
         # load printer objects
         self.gcode_macro = self.printer.load_object(config, 'gcode_macro')
         # register itself for printer callbacks
@@ -1034,7 +1039,25 @@ class MenuManager:
             # lets start and populate the menu items
             self.begin(eventtime)
 
+    def _change_page(self, step):
+        groups = getattr(self.display, 'display_data_groups', {})
+        pages = [p for p in self._pages if p in groups]
+        if not pages:
+            return False
+        if step == 0:
+            self._page = 0
+        else:
+            self._page = (self._page + step) % len(pages)
+        self.display.show_data_group = groups[pages[self._page]]
+        return True
+
     def key_event(self, key, eventtime):
+        if not self.running and self._pages:
+            step = {'up': -1, 'fast_up': -1, 'down': 1, 'fast_down': 1,
+                    'back': 0}.get(key)
+            if step is not None and self._change_page(step):
+                self.display.request_redraw()
+                return
         if key == 'click':
             self._click_callback(eventtime, key)
         elif key == 'long_click':
