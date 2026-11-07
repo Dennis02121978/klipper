@@ -70,6 +70,9 @@ class SensingZOffset:
         self.acuteness = config.getfloat('acuteness', 24., above=0.)
         self.max_steps_at_once = config.getfloat('max_steps_at_once', 48.,
             above=0.)
+        # Meldung im Terminal, sobald der Offset um diesen Betrag gestiegen
+        # ist (0 = keine Zwischenmeldungen, nur Obergrenze und Ergebnis)
+        self.report_step = config.getfloat('report_step', 0.02, minval=0.)
 
         self.load_cell = self.printer.lookup_object('load_cell')
         self.load_cell.subscribe_force(self.force_callback)
@@ -89,6 +92,7 @@ class SensingZOffset:
         self.averaged_force = 0.
         self.i_average = 0
         self.enable = False
+        self._reset_stats()
 
         # Anzeige in Mainsail unter Sonstige (Objekttyp load_cell, Wert in
         # force_g, Einheit dort fest "g"): Offset in Mikrometer
@@ -107,9 +111,34 @@ class SensingZOffset:
 
 
     cmd_Z_SENSE_OFFSET_help = "Increase Z offset depending on measured " \
-            "extrusion pressure (ENABLE=0 switches it off, offset stays)"
+            "extrusion pressure (ENABLE=0 off, offset stays; QUERY=1 status)"
+
+    def _reset_stats(self):
+        self.reported_offset = 0.
+        self.max_reported = False
+        self.summary_done = False
+        self.n_samples = 0
+        self.n_over = 0
+        self.force_sum = 0.
+        self.force_max = 0.
+
+    def _respond(self, msg):
+        self.gcode.respond_info(msg, log=True)
+
+    def _status_text(self):
+        txt = "%.3f mm (max %.3f), Schwelle %d" % (self.z_offset,
+            self.max_z_offset, self.force_threshold)
+        if self.n_samples:
+            txt += ", Kraft max %d / Mittel %d, ueber Schwelle %d von %d" % (
+                self.force_max, self.force_sum / self.n_samples,
+                self.n_over, self.n_samples)
+        return txt
 
     def Z_SENSE_OFFSET(self, gcmd):
+        if gcmd.get_int("QUERY", 0, minval=0, maxval=1):
+            gcmd.respond_info("Sense Offset %s: %s" % (
+                "an" if self.enable else "aus", self._status_text()))
+            return
         if not gcmd.get_int("ENABLE", 1, minval=0, maxval=1):
             self.enable = False
             gcmd.respond_info("Sense Offset aus, Offset bleibt %.3f mm"
@@ -124,6 +153,7 @@ class SensingZOffset:
         self.smoothed_force = 0.
         self.averaged_force = 0.
         self.i_average = 0
+        self._reset_stats()
         self.enable = True
         gcmd.respond_info("Sense Offset an: Schwelle %d, max %.3f mm bis "
                           "Z %.2f" % (self.force_threshold, self.max_z_offset,
@@ -164,6 +194,10 @@ class SensingZOffset:
         # bed mesh, gcode offset and this offset
         gm = self.gcode_move
         if gm.last_position[2] - gm.base_position[2] > self.max_z_height:
+          if self.n_samples and not self.summary_done:
+            self.summary_done = True
+            self._respond("Sense Offset Ergebnis erster Layer: "
+                          + self._status_text())
           return
 
         # perform averaging with some smoothing
@@ -175,6 +209,11 @@ class SensingZOffset:
         self.averaged_force *= self.smoothing
         self.i_average *= self.smoothing
         self.smoothed_force = smoothed_force
+        self.n_samples += 1
+        self.force_sum += smoothed_force
+        self.force_max = max(self.force_max, smoothed_force)
+        if smoothed_force >= self.force_threshold:
+          self.n_over += 1
 
         # no action required if below threshold
         if smoothed_force < self.force_threshold:
@@ -213,6 +252,19 @@ class SensingZOffset:
 
         logging.info("z_sense_offset: force=%d n_steps=%.1f z_offset=%.3f"
                      % (smoothed_force, n_steps, self.z_offset))
+
+        if self.z_offset >= self.max_z_offset and not self.max_reported:
+          self.max_reported = True
+          self.reported_offset = self.z_offset
+          self._respond("Sense Offset: Obergrenze %.3f mm erreicht "
+                        "(Kraft %d, Schwelle %d)" % (self.z_offset,
+                        smoothed_force, self.force_threshold))
+        elif (self.report_step > 0. and self.z_offset
+              >= self.reported_offset + self.report_step):
+          self.reported_offset = self.z_offset
+          self._respond("Sense Offset: %.3f mm (Kraft %d, Schwelle %d)"
+                        % (self.z_offset, smoothed_force,
+                           self.force_threshold))
 
 
 def load_config(config):

@@ -456,6 +456,7 @@
           <li><b>Schrittweite:</b> Bei mehr als 10 % über der Schwelle (<code>relative_tolerance</code>) und steigender Kraft wird mit dem Überschuss größer korrigiert, höchstens 48 Schritte auf einmal. Je mehr Offset schon da ist, desto langsamer wird weiter korrigiert, damit nichts überschwingt. Bei kleinem Überschuss und fallender Kraft passiert nichts.</li>
           <li><b>Obergrenze:</b> Mehr als <code>max_z_offset</code> wird nie korrigiert. So wird eine Düse, die aus anderem Grund zu tief steht, nicht endlos angehoben.</li>
           <li><b>Zurücksetzen:</b> Jeder Aufruf von <code>Z_SENSE_OFFSET</code> setzt den Offset auf 0 und startet neu. Homing schaltet die Funktion aus und setzt den Offset auf 0, damit er nicht in den nächsten Druck (z. B. die Heißmessung) übernommen wird. <code>Z_SENSE_OFFSET ENABLE=0</code> schaltet aus und lässt den Offset stehen.</li>
+          <li><b>Terminal:</b> Steigt der Offset um 0,02 mm (<code>report_step</code>), erscheint eine Meldung mit Offset und Kraft, ebenso beim Erreichen von <code>max_z_offset</code>. Nach dem ersten Layer folgt das Ergebnis: Offset, höchste und mittlere Kraft, wie oft die Schwelle überschritten wurde. <code>Z_SENSE_OFFSET QUERY=1</code> zeigt den Stand jederzeit.</li>
           <li><b>Anzeige:</b> Mainsail zeigt den Offset unter „Sonstige“ als <code>Sense Offset</code> in Mikrometern (Einheit dort fest „g“, 120 = 0,120 mm). Auf dem Display steht er unten rechts als <code>S0.000</code> in mm, solange er an ist oder einen Wert hat.</li>
         </ul>
         <table>
@@ -922,13 +923,9 @@ text: { render("_load_cell_digits") }
 # Zeile 4: Statustext, rechts der Sense Offset in mm (S0.000), solange er an ist oder einen Wert hat
 [display_data _default_16x4 print_status]
 position: 3, 0
+# (eine Zeile, damit keine Leerzeichen aus der Vorlage mitgezaehlt werden)
 text:
-  {% set so = printer.z_sense_offset %}
-  {% if so.enabled or so.z_offset > 0 %}
-    { "%-10.10s" % render("_print_status") }{ "S%5.3f" % so.z_offset }
-  {% else %}
-    { render("_print_status") }
-  {% endif %}
+  {% set so = printer.z_sense_offset %}{% set st = render("_print_status")|trim %}{% if so.enabled or so.z_offset > 0 %}{ "%-10.10s" % st }{ "S%5.3f" % so.z_offset }{% else %}{ st }{% endif %}
 `;
   return o;
 }

@@ -1,5 +1,10 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-07 (2): Sense Offset im Terminal, Display-Anzeige korrigiert
+
+- **Sense Offset:** Meldungen im Terminal, wenn der Offset um `report_step` (Standard 0,02 mm) steigt und wenn `max_z_offset` erreicht ist. Nach dem ersten Layer folgt das Ergebnis mit höchster und mittlerer Kraft und der Zahl der Überschreitungen. `Z_SENSE_OFFSET QUERY=1` zeigt den Stand.
+- **Display:** Die Statuszeile zählte beim Kürzen Leerzeichen aus der Vorlage mit (z. B. „RF2000 vS0.171“). Jetzt steht dort „RF2000 v2 S0.171“.
+
 ## 2026-11-07: Sense Offset korrigiert, Anzeige in Mainsail und Display, Menütasten
 
 - **Sense Offset:** Homing setzt den Offset jetzt auf 0. Vorher blieb er nach dem Druck stehen und verfälschte beim nächsten Druck die Heißmessung um bis zu `max_z_offset`.
