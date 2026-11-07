@@ -1,5 +1,11 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-07 (4): RF2000-Display mit 20 Spalten und westlichem Zeichensatz
+
+- **`rf_display.cfg`:** Seiten und Menütexte für 20x4 nach den Repetier-Vorlagen für das RF2000 (`UI_COLS 20`). Gradzeichen als eigenes Zeichen, Mikrometer als „um“.
+- **Display:** Neue Option `hd44780_charset` (`western` für RF2000, `a00` für RF1000). Vorher wurden die Umlaut-Codes des RF1000 verwendet, auf dem RF2000 kamen falsche Zeichen.
+- **Menü:** Neue Option `menu_show_back: False` entfernt den Eintrag „..“ (das RF2000 hat eine Zurück-Taste).
+
 ## 2026-11-07 (3): Display und Menü wie in der RF-Firmware
 
 - **`config/rf_display.cfg`:** Startseiten und Menü wie in der RF-Repetier-Firmware (deutsche Texte aus `uilang.h`), Einstellungen werden wie im EEPROM in `rf_variables.cfg` gespeichert. Siehe [DISPLAY_MENU.md](DISPLAY_MENU.md).

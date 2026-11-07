@@ -1,6 +1,6 @@
 # Display und Menü wie in der RF-Firmware
 
-Mit `config/rf_display.cfg` zeigt das 16x4-Display eines RF1000/RF2000 unter Klipper die gleichen Startseiten und das gleiche Menü wie die RF-Repetier-Firmware. Texte und Aufbau stammen aus `uimenu.h` und `uilang.h` der Original-Firmware (deutsch).
+Mit `config/rf_display.cfg` zeigt das 20x4-Display eines RF2000 / RF2000 v2 unter Klipper die gleichen Startseiten und das gleiche Menü wie die RF-Repetier-Firmware. Texte und Aufbau stammen aus `uimenu.h` und `uilang.h` der Original-Firmware (deutsch).
 
 ## Einbauen
 
@@ -17,8 +17,14 @@ Mit `config/rf_display.cfg` zeigt das 16x4-Display eines RF1000/RF2000 unter Kli
 display_group: rf_page1
 menu_root: rf
 menu_pages: rf_page1, rf_page_mod, rf_page2, rf_page3, rf_page4
+menu_show_back: False
 menu_reverse_input: True
+hd44780_charset: western
 ```
+
+`hd44780_charset: western` ist der Zeichensatz des RF2000-Displays (Repetier `UI_DISPLAY_CHARSET 2`), beim RF1000 `a00`. `menu_show_back: False` entfernt den Eintrag „..“ aus den Listen, zurück geht über die Zurück-Taste. Das Gradzeichen kommt wie in Repetier aus einem eigenen Zeichen (`~degrees~`), Mikrometer stehen als „um“.
+
+Die Seiten sind für 20 Spalten gebaut (Repetier-Vorlagen für `UI_COLS 20`). Am RF1000 mit 16 Spalten würden Zeilen abgeschnitten.
 
 4. Klipper-Dienst neu starten: `sudo systemctl restart klipper`.
 
@@ -58,7 +64,7 @@ menu_reverse_input: True
 
 ## Technische Änderungen
 
-- `display/hd44780.py`: `encode_text()` bildet ä, ö, ü, ß, ° und µ auf die Codes im Zeichen-ROM ab (wie `uilang.h`: ä 0xE1, ö 0xEF, ü 0xF5, ß 0xE2). Ä, Ö, Ü werden zu Ae, Oe, Ue.
+- `display/hd44780.py`: Option `hd44780_charset` (`none` Standard, `western`, `a00`, `ascii`). `encode_text()` bildet Umlaute auf die Codes im Zeichen-ROM ab wie `uilang.h`: western ä 0x84, ö 0x94, ü 0x81, Ä 0x8E, Ü 0x9A; a00 ä 0xE1, ö 0xEF, ü 0xF5, ß 0xE2. Nicht vorhandene Zeichen werden ersetzt (Oe, ss, u, o).
 - `display/display.py`: Verwendet `encode_text()`, wenn der Display-Treiber sie hat.
-- `display/menu.py`: Option `menu_pages`. Außerhalb des Menüs wechseln hoch und runter die `display_data`-Gruppe, zurück springt auf die erste Seite.
+- `display/menu.py`: Option `menu_show_back` (Eintrag „..“ ein/aus) und `menu_pages`. Außerhalb des Menüs wechseln hoch und runter die `display_data`-Gruppe, zurück springt auf die erste Seite.
 - `z_sense_offset.py`: `SET_Z_SENSE_OFFSET FORCE_THRESHOLD= MAX_Z_OFFSET=` setzt die Werte, ohne die Funktion einzuschalten.

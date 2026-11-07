@@ -596,7 +596,8 @@ class MenuList(MenuContainer):
         super(MenuList, self)._populate()
         self._viewport_top = 0
         #  add back as first item
-        self.insert_item(self._itemBack, 0)
+        if self.manager._show_back:
+            self.insert_item(self._itemBack, 0)
 
     def draw_container(self, nrows, eventtime):
         display = self.manager.display
@@ -713,6 +714,9 @@ class MenuManager:
         self._pages = [p.strip() for p in config.get(
             'menu_pages', '').split(',') if p.strip()]
         self._page = 0
+        # Eintrag ".." in jeder Liste (aus, wenn das Display eine
+        # Zurueck-Taste hat, wie beim RF1000/RF2000)
+        self._show_back = config.getboolean('menu_show_back', True)
         # load printer objects
         self.gcode_macro = self.printer.load_object(config, 'gcode_macro')
         # register itself for printer callbacks

@@ -30,6 +30,12 @@ class HD44780:
                                             LINE_LENGTH_DEFAULT)
         self.hd44780_delay = config.getfloat('hd44780_delay', HD44780_DELAY,
                                              above=0., maxval=HD44780_DELAY_MAX)
+        # Zeichensatz des Display-ROMs fuer Umlaute (wie UI_DISPLAY_CHARSET der
+        # RF-Repetier-Firmware): none = Text unveraendert (Standard),
+        # a00 = japanisches ROM (RF1000), western = westliches ROM (RF2000)
+        self.text_map = config.getchoice('hd44780_charset', {
+            'none': None, 'a00': self.CHARSET_A00,
+            'western': self.CHARSET_WESTERN, 'ascii': {}}, 'none')
         mcu = None
         for pin_params in pins:
             if mcu is not None and pin_params['chip'] != mcu:
@@ -116,15 +122,22 @@ class HD44780:
             data = glyph_data.get('icon5x8')
             if data is not None:
                 self.icons[glyph_name] = data
-    # Deutsche Zeichen auf die Codes im Zeichen-ROM (A00) abbilden, wie die
-    # RF-Repetier-Firmware (uilang.h): ae=0xE1, oe=0xEF, ue=0xF5, ss=0xE2
-    TEXT_MAP = {u'\u00e4': b'\xe1', u'\u00f6': b'\xef', u'\u00fc': b'\xf5',
-                u'\u00df': b'\xe2', u'\u00b0': b'\xdf', u'\u00c4': b'Ae',
-                u'\u00d6': b'Oe', u'\u00dc': b'Ue', u'\u00b5': b'\xe4'}
+    # Codes wie in uilang.h der RF-Repetier-Firmware. Nicht abgebildete
+    # Zeichen werden ersetzt (ae, oe, ue, ss, u fuer Mikro, ? sonst).
+    CHARSET_A00 = {u'\u00e4': b'\xe1', u'\u00f6': b'\xef', u'\u00fc': b'\xf5',
+                   u'\u00df': b'\xe2', u'\u00b0': b'\xdf', u'\u00b5': b'\xe4'}
+    CHARSET_WESTERN = {u'\u00e4': b'\x84', u'\u00f6': b'\x94',
+                       u'\u00fc': b'\x81', u'\u00c4': b'\x8e',
+                       u'\u00dc': b'\x9a'}
+    FALLBACK = {u'\u00e4': b'ae', u'\u00f6': b'oe', u'\u00fc': b'ue',
+                u'\u00c4': b'Ae', u'\u00d6': b'Oe', u'\u00dc': b'Ue',
+                u'\u00df': b'ss', u'\u00b5': b'u', u'\u00b0': b'o'}
     def encode_text(self, text):
+        if self.text_map is None:
+            return text.encode()
         out = bytearray()
         for c in text:
-            m = self.TEXT_MAP.get(c)
+            m = self.text_map.get(c, self.FALLBACK.get(c))
             if m is not None:
                 out += m
             elif ord(c) < 0x80:
