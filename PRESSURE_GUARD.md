@@ -26,7 +26,12 @@ Befehle (nur bis zum Neustart gültig): `RF_EMERGENCY_PAUSE [MIN=] [MAX=]` (wie 
 - Mit Mock-Tests geprüft; die Notfall-Pause und die Kompensation selbst sind noch nicht
   unter echter Last am Drucker getestet.
 
-## Live-Kurve "Digits" in Mainsail
+## Anzeige in Mainsail
+Unter "Sonstige" zeigt Mainsail ohne weitere Einstellung die Kraft als `Load Cell` und den
+Sense Offset als `Sense Offset` (in Mikrometern). Die Einheit "g" ist dort fest vorgegeben,
+gemeint sind Digits bzw. Mikrometer.
+
+### Optional: Kurve "Digits" im Temperatur-Diagramm
 Das Modul registriert den Sensortyp `rf1000_force`. In `printer.cfg` **nach** `[rf1000_pressure_guard]`:
 
 ```

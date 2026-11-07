@@ -319,7 +319,7 @@
             </div>
           </div>
         </fieldset>
-        <label class="check"><input type="checkbox" id="digits" checked> Kurve „Digits“ in Mainsail anzeigen</label>
+        <label class="check"><input type="checkbox" id="digits"> Zusätzlich Kurve „Digits“ im Temperatur-Diagramm von Mainsail</label>
       </div>
     </fieldset>
   </section>
@@ -385,8 +385,8 @@
         <ol>
           <li><b>Ruhewert:</b> Im Terminal <code>LCP_READ</code> mehrfach aufrufen, solange nichts drückt. Normal sind kleine Werte um 0
               (Rauschen von etwa ±1). Beim Start wird der erste Wert als Nullpunkt genommen, der Drucker muss dabei ruhig stehen.</li>
-          <li><b>Kurve beobachten:</b> Mit <code>Digits</code> in Mainsail (Temperatur-Diagramm, Einheit dort fest „°C“, gemeint ist die Kraft)
-              einen normalen, guten Druck mitverfolgen. Notiere dir den höchsten und den niedrigsten Wert im sauberen Betrieb.</li>
+          <li><b>Werte beobachten:</b> In Mainsail unter „Sonstige“ steht die Kraft als <code>Load Cell</code> (Einheit dort fest „g“, gemeint sind Digits),
+              optional zusätzlich als Kurve <code>Digits</code> im Temperatur-Diagramm. Einen normalen, guten Druck mitverfolgen. Notiere dir den höchsten und den niedrigsten Wert im sauberen Betrieb.</li>
           <li><b>Fehlerfall messen:</b> Wie hoch geht der Wert bei Düsenverstopfung oder wenn die Düse in das Bett drückt? Das ist deine Obergrenze.</li>
           <li><b>Rahmen:</b> Die Grenzen müssen im Messbereich liegen. <code>max_abs_force</code> (Standard 5000) bestimmt die Messkraft beim <code>PROBE</code>.
               Der Bereichsschutz des Sensors ist getrennt davon mit <code>adc_max_abs_force</code> (Standard im Generator 8000) einstellbar. Liegt <code>emergency_max</code> darüber, stoppt Klipper mit „ADC out of range“, bevor die Pause greift.</li>
@@ -450,12 +450,13 @@
            und wird in <code>PRINT_START</code> mit <code>Z_SENSE_OFFSET</code> eingeschaltet.</p>
         <p><b>So arbeitet die Regelung:</b></p>
         <ul>
-          <li><b>Nur im ersten Layer:</b> Aktiv ist sie nur, solange die Düse unterhalb von <code>max_z_height</code> ist. Darüber wird nichts mehr geändert, der erreichte Offset bleibt bis zum Ende des Drucks bestehen.</li>
+          <li><b>Nur im ersten Layer:</b> Aktiv ist sie nur, solange die Z-Höhe aus dem G-Code (wie im Slicer, ohne Bed Mesh und Z-Offset) unterhalb von <code>max_z_height</code> ist. Darüber wird nichts mehr geändert, der erreichte Offset bleibt bis zum Ende des Drucks bestehen.</li>
           <li><b>Messung:</b> Es wird über mehrere Messwerte (Standard 10) der Betrag der Kraft gemittelt, mit etwas Glättung. Die Einbaurichtung des DMS spielt daher keine Rolle.</li>
           <li><b>Nur anheben, nie zurück:</b> Liegt die gemittelte Kraft über <code>force_threshold</code>, wird der Abstand um jeweils 1 µm (<code>step_size</code>) oder mehr vergrößert. Sinkt die Kraft wieder (zum Beispiel bei Retracts), wird der Offset <b>nicht</b> zurückgenommen. Die Düse kommt dem Bett also nie näher als ohne Sense Offset.</li>
           <li><b>Schrittweite:</b> Bei mehr als 10 % über der Schwelle (<code>relative_tolerance</code>) und steigender Kraft wird mit dem Überschuss größer korrigiert, höchstens 48 Schritte auf einmal. Je mehr Offset schon da ist, desto langsamer wird weiter korrigiert, damit nichts überschwingt. Bei kleinem Überschuss und fallender Kraft passiert nichts.</li>
           <li><b>Obergrenze:</b> Mehr als <code>max_z_offset</code> wird nie korrigiert. So wird eine Düse, die aus anderem Grund zu tief steht, nicht endlos angehoben.</li>
-          <li><b>Zurücksetzen:</b> Jeder Aufruf von <code>Z_SENSE_OFFSET</code> setzt den Offset auf 0 und startet neu. Homing schaltet die Funktion aus.</li>
+          <li><b>Zurücksetzen:</b> Jeder Aufruf von <code>Z_SENSE_OFFSET</code> setzt den Offset auf 0 und startet neu. Homing schaltet die Funktion aus und setzt den Offset auf 0, damit er nicht in den nächsten Druck (z. B. die Heißmessung) übernommen wird. <code>Z_SENSE_OFFSET ENABLE=0</code> schaltet aus und lässt den Offset stehen.</li>
+          <li><b>Anzeige:</b> Mainsail zeigt den Offset unter „Sonstige“ als <code>Sense Offset</code> in Mikrometern (Einheit dort fest „g“, 120 = 0,120 mm). Auf dem Display steht er unten rechts als <code>S0.000</code> in mm, solange er an ist oder einen Wert hat.</li>
         </ul>
         <table>
           <tr><th>Einstellung</th><th>Bedeutung</th></tr>
@@ -504,6 +505,8 @@
           <tr><td><code>Unknown temperature sensor 'rf1000_force'</code></td><td>Entweder <code>[rf1000_pressure_guard]</code> steht hinter <code>[temperature_sensor Digits]</code>,
               oder der Dienst wurde nicht komplett neu gestartet (nur RESTART). <code>sudo systemctl restart klipper</code>.</td></tr>
           <tr><td>Digits-Kurve zeigt „°C“</td><td>Mainsail schreibt die Einheit bei Temperatursensoren fest. Gemeint ist die Kraft.</td></tr>
+          <tr><td>„Load Cell“ und „Sense Offset“ unter „Sonstige“ zeigen „g“</td><td>Mainsail schreibt die Einheit dort fest. Gemeint sind Digits bzw. Mikrometer.</td></tr>
+          <tr><td>„Load Cell“ unter „Sonstige“ zeigt „--“</td><td>Altes <code>rf1000_load_cell_probe.py</code>. Modul aus dem Fork kopieren, Dienst neu starten.</td></tr>
           <tr><td>Digits-Kurve bewegt sich nur etwa einmal pro Sekunde</td><td>Mainsail fragt so oft ab. Für schnelle Werte <code>LCP_READ</code> verwenden.</td></tr>
           <tr><td>Klipper stoppt (Shutdown) statt zu pausieren: <code>ADC (ADS1100) out of range</code></td><td>Die Kraft ist über den Bereichsschutz des Sensors gestiegen (<code>max_abs_force</code>, früher 5000), bevor die Notfall-Pause greifen konnte. In <code>[rf1000_load_cell_probe]</code> <code>adc_max_abs_force: 8000</code> eintragen (Modul aus dem Fork, Dienst neu starten). Die Grenzen der Notfall-Pause müssen darunter liegen. Mit der Einstellung 8000 bleibt es unter dem Messbereich des Sensors (Kalibrierwert 8500).</td></tr>
           <tr><td>Keine Pause trotz Überschreitung</td><td>Es wird nicht gedruckt, Achsen nicht referenziert, oder beide Grenzen stehen auf 0.</td></tr>
@@ -860,6 +863,8 @@ d5_pin: PK2
 d6_pin: PA1
 d7_pin: PJ3
 display_group: _default_16x4
+# Werte im Menue aendern: Taste hoch erhoeht, Taste runter verringert
+menu_reverse_input: True
 
 #RE=TAST3:PH0, Ok=TAST1:PG5, DN=TAST2:PB7, LE=TAST4:PB5, UP=TAST5:PL7,
 #PAUSE=TAST_E5:PH7, Z-DN=TAST_E2:PJ4, CONT=TAST_E6:PH2,
@@ -913,6 +918,17 @@ text:
 [display_data _default_16x4 load_cell_digits]
 position: 0, 10
 text: { render("_load_cell_digits") }
+
+# Zeile 4: Statustext, rechts der Sense Offset in mm (S0.000), solange er an ist oder einen Wert hat
+[display_data _default_16x4 print_status]
+position: 3, 0
+text:
+  {% set so = printer.z_sense_offset %}
+  {% if so.enabled or so.z_offset > 0 %}
+    { "%-10.10s" % render("_print_status") }{ "S%5.3f" % so.z_offset }
+  {% else %}
+    { render("_print_status") }
+  {% endif %}
 `;
   return o;
 }
@@ -1468,32 +1484,32 @@ gcode:
     G1 Z10 F3000
     G1 X{"%.1f" % px} Y{"%.1f" % py} F6000
     G1 Z1 F1200
-    HOT_Z_PROBE_STEP2 X={px} Y={py}
+    _HOT_Z_PROBE_STEP2 X={px} Y={py}
 
 # 1. Messung: reinigt die Duese (Filamentreste werden gegen das Bett gedrueckt), Ergebnis wird nur angezeigt
-[gcode_macro HOT_Z_PROBE_STEP2]
+[gcode_macro _HOT_Z_PROBE_STEP2]
 gcode:
     _HOT_Z_CHECK
     PROBE
-    HOT_Z_PROBE_STEP3 X={params.X|float + 2.0} Y={params.Y} Z1={printer["rf1000_load_cell_probe"].last_z_result}
+    _HOT_Z_PROBE_STEP3 X={params.X|float + 2.0} Y={params.Y} Z1={printer["rf1000_load_cell_probe"].last_z_result}
 
 # 2. Messung: 2 mm weiter in X (frische Stelle), diese zaehlt
-[gcode_macro HOT_Z_PROBE_STEP3]
+[gcode_macro _HOT_Z_PROBE_STEP3]
 gcode:
     G1 Z5 F3000
     G1 X{"%.1f" % (params.X|float)} Y{"%.1f" % (params.Y|float)} F6000
     G1 Z1 F1200
-    HOT_Z_PROBE_STEP4 X={params.X} Y={params.Y} Z1={params.Z1}
+    _HOT_Z_PROBE_STEP4 X={params.X} Y={params.Y} Z1={params.Z1}
 
-[gcode_macro HOT_Z_PROBE_STEP4]
+[gcode_macro _HOT_Z_PROBE_STEP4]
 gcode:
     # Differenz toolhead-Z zu G-Code-Z ist der Mesh-Anteil an diesem Punkt
     {% set mz = printer.toolhead.position.z - printer.gcode_move.gcode_position.z %}
     _HOT_Z_CHECK
     PROBE
-    HOT_Z_PROBE_STEP5 MZ={mz} Z1={params.Z1}
+    _HOT_Z_PROBE_STEP5 MZ={mz} Z1={params.Z1}
 
-[gcode_macro HOT_Z_PROBE_STEP5]
+[gcode_macro _HOT_Z_PROBE_STEP5]
 gcode:
     {% set z2 = printer["rf1000_load_cell_probe"].last_z_result %}
     {% set d = z2 - params.MZ|float %}
@@ -1684,7 +1700,7 @@ const INFO = {
   fpct: ['Extrusion bei voller Wirkung (%)', '<p>Änderung der Materialmenge bei voller Wirkung, von −99 bis 99. Beispiel +10 = 10 % mehr Material.</p>'],
   vpct: ['Vorschub bei voller Wirkung (%)', '<p>Änderung der Geschwindigkeit bei voller Wirkung, von −90 bis 99. Beispiel −20 = 20 % langsamer.</p>'],
   fminz: ['Korrektur erst ab Z (mm)', '<p>Die Korrektur greift erst über dieser Z-Höhe, damit die ersten Schichten unberührt bleiben.</p>'],
-  digits: ['Kurve „Digits“', '<p>Zeigt die Kraft des DMS als Kurve „Digits“ in Mainsail an. Praktisch zum Einstellen der Grenzen, weil du die Werte beim Drucken live siehst.</p>']
+  digits: ['Kurve „Digits“', '<p>Die Kraft des DMS („Load Cell“) und der Sense Offset stehen in Mainsail immer unter „Sonstige“, dafür ist nichts einzustellen. Mainsail schreibt dort fest „g“ dahinter, gemeint sind Digits bzw. beim Sense Offset Mikrometer.</p><p>Mit diesem Haken kommt die Kraft zusätzlich als Kurve „Digits“ ins Temperatur-Diagramm (Einheit dort fest „°C“). Praktisch, um beim Einstellen der Grenzen den Verlauf zu sehen.</p>']
 };
 (function () {
   const dlg = document.createElement('dialog');

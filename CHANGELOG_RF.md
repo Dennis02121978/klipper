@@ -1,5 +1,14 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-07: Sense Offset korrigiert, Anzeige in Mainsail und Display, Menütasten
+
+- **Sense Offset:** Homing setzt den Offset jetzt auf 0. Vorher blieb er nach dem Druck stehen und verfälschte beim nächsten Druck die Heißmessung um bis zu `max_z_offset`.
+- **Sense Offset:** `max_z_height` wird an der Z-Höhe aus dem G-Code geprüft (ohne Bed Mesh und Z-Offset). Vorher zählte die Z-Höhe samt Mesh; bei einem Mesh um −0,5 mm war die Regelung bis etwa zum 4. Layer aktiv.
+- **Sense Offset:** Der letzte Kraftwert für die Trend-Erkennung wird auch über der Schwelle aktualisiert. `Z_SENSE_OFFSET ENABLE=0` schaltet aus (Offset bleibt), An und Aus werden in der Konsole gemeldet.
+- **Mainsail:** Unter „Sonstige“ stehen `Load Cell` (Kraft in Digits) und `Sense Offset` (in µm). Mainsail schreibt dort fest „g“ dahinter. Die Kurve „Digits“ im Temperatur-Diagramm ist im Config Creator nur noch optional.
+- **Display:** Zeile 4 zeigt rechts `S0.000` (Sense Offset in mm), solange er an ist oder einen Wert hat. `menu_reverse_input: True`: Taste hoch erhöht beim Ändern von Werten, Taste runter verringert.
+- **Makros:** Die Zwischenschritte der Heißmessung heißen jetzt `_HOT_Z_PROBE_STEP2` bis `_HOT_Z_PROBE_STEP5` und erscheinen nicht mehr als Knöpfe in Mainsail.
+
 ## 2026-11-06: Config Creator erweitert, Sense Offset korrigiert
 
 - **Sense Offset:** `PRINT_START` ruft jetzt `Z_SENSE_OFFSET` auf. Vorher blieb das Modul ausgeschaltet, weil Homing es abschaltet und kein Befehl es wieder einschaltet. `max_z_height` steht jetzt in der `printer.cfg`; die Anleitung beschreibt die Regelung genau.

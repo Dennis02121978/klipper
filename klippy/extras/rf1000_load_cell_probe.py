@@ -225,6 +225,9 @@ class LoadCellProbe:
         return {
             "last_force": self._last_force,
             "last_z_result": self._last_z_result,
+            # Mainsail zeigt Objekte "load_cell ..." unter Sonstige an,
+            # Wert aus force_g (Einheit dort fest "g", hier Digits)
+            "force_g": round(self._last_force),
         }
 
     def start_probe_session(self, gcmd=None):
