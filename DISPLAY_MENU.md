@@ -14,7 +14,7 @@ Mit `config/rf_display.cfg` zeigt das 20x4-Display eines RF2000 / RF2000 v2 unte
 3. Unter `[display]` eintragen:
 
 ```ini
-display_group: rf_page1
+display_group: rf_splash
 menu_root: rf
 menu_pages: rf_page1, rf_page_mod, rf_page2, rf_page3, rf_page4
 menu_show_back: False
@@ -27,6 +27,12 @@ hd44780_charset: western
 Die Seiten sind für 20 Spalten gebaut (Repetier-Vorlagen für `UI_COLS 20`). Am RF1000 mit 16 Spalten würden Zeilen abgeschnitten.
 
 4. Klipper-Dienst neu starten: `sudo systemctl restart klipper`.
+
+## Startbild
+
+Beim Start und nach jedem Neustart von Klipper zeigt das Display ein Startbild: links und rechts ein 3D-Würfel aus eigenen Zeichen, in der Mitte „3D-Artmaker“ mit Unterstrich und die Version. Unten läuft etwa 3 Sekunden ein Balken, dann erscheint der Stand. Nach weiteren 3 Sekunden wechselt die Anzeige auf Seite 1.
+
+Version und Stand stehen in `rf_display.cfg` im Makro `_RF_INFO` (`variable_version`, `variable_stand`). `_RF_INFO` im Terminal gibt beides aus.
 
 ## Bedienung
 

@@ -1,5 +1,9 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-07 (5): Startbild 3D-Artmaker
+
+- **`rf_display.cfg`:** Startbild `rf_splash` mit 3D-Würfel aus eigenen Zeichen, Name, Version, Fortschrittsbalken und Stand, danach Seite 1. Version und Stand im Makro `_RF_INFO`.
+
 ## 2026-11-07 (4): RF2000-Display mit 20 Spalten und westlichem Zeichensatz
 
 - **`rf_display.cfg`:** Seiten und Menütexte für 20x4 nach den Repetier-Vorlagen für das RF2000 (`UI_COLS 20`). Gradzeichen als eigenes Zeichen, Mikrometer als „um“.
