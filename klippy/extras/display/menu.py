@@ -348,7 +348,10 @@ class MenuContainer(MenuElement):
     def update_items(self):
         _a = [(item, name) for item, name in self._allitems
               if item.is_enabled()]
-        self._items, self._names = zip(*_a) or ([], [])
+        # Leere Liste (z. B. keine Datei, ohne ".."-Eintrag): zip(*[]) liefert
+        # nichts zum Entpacken und brachte Klipper zum Absturz
+        self._items = tuple(item for item, name in _a)
+        self._names = tuple(name for item, name in _a)
 
     # select methods
     def init_selection(self):
@@ -663,15 +666,36 @@ class MenuList(MenuContainer):
 class MenuVSDList(MenuList):
     def __init__(self, manager, config, **kwargs):
         super(MenuVSDList, self).__init__(manager, config, **kwargs)
+        # start_print: True = Datei antippen startet den Druck sofort
+        # (wie in der RF-Firmware), False = nur auswaehlen (M23)
+        self._start_print = kwargs.get('start_print', False)
+        self._empty_text = kwargs.get('empty_text', 'No files')
+        if config is not None:
+            self._start_print = config.getboolean(
+                'start_print', self._start_print)
+            self._empty_text = config.get('empty_text', self._empty_text)
 
     def _populate(self):
         super(MenuVSDList, self)._populate()
         sdcard = self.manager.printer.lookup_object('virtual_sdcard', None)
-        if sdcard is not None:
-            files = sdcard.get_file_list()
-            for fname, fsize in files:
-                self.insert_item(self.manager.menuitem_from(
-                    'command', name=repr(fname), gcode='M23 /%s' % str(fname)))
+        files = sdcard.get_file_list() if sdcard is not None else []
+        if not files:
+            # Hinweis statt leerer Liste, Antippen geht zurueck
+            def _back(el, context):
+                el.manager.back()
+            self.insert_item(self.manager.menuitem_from(
+                'command', name=repr(self._empty_text), gcode=_back))
+            return
+        for fname, fsize in files:
+            if self._start_print:
+                def _start(el, context, f=str(fname)):
+                    el.manager.exit()
+                    return 'SDCARD_PRINT_FILE FILENAME="%s"' % (f,)
+                gcode = _start
+            else:
+                gcode = 'M23 /%s' % str(fname)
+            self.insert_item(self.manager.menuitem_from(
+                'command', name=repr(fname), gcode=gcode))
 
 
 menu_items = {
