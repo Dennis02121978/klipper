@@ -670,15 +670,26 @@ class MenuVSDList(MenuList):
         # (wie in der RF-Firmware), False = nur auswaehlen (M23)
         self._start_print = kwargs.get('start_print', False)
         self._empty_text = kwargs.get('empty_text', 'No files')
+        self._card_text = kwargs.get('card_text', 'SD card')
         if config is not None:
             self._start_print = config.getboolean(
                 'start_print', self._start_print)
             self._empty_text = config.get('empty_text', self._empty_text)
+            self._card_text = config.get('card_text', self._card_text)
 
     def _populate(self):
         super(MenuVSDList, self)._populate()
+        # SD-Karte im Kartenleser des Druckers (rf_sdcard): eigener Eintrag
+        # oben in der Liste, nur wenn eine Karte steckt
+        card = self.manager.printer.lookup_object('rf_sdcard', None)
+        if card is not None and card.present is not False:
+            self.insert_item(self.manager.menuitem_from(
+                'rfsdlist', name=repr(self._card_text),
+                start_print=self._start_print, empty_text=self._empty_text))
         sdcard = self.manager.printer.lookup_object('virtual_sdcard', None)
         files = sdcard.get_file_list() if sdcard is not None else []
+        if not files and card is not None and card.present is not False:
+            return
         if not files:
             # Hinweis statt leerer Liste, Antippen geht zurueck
             def _back(el, context):
@@ -698,12 +709,43 @@ class MenuVSDList(MenuList):
                 'command', name=repr(fname), gcode=gcode))
 
 
+class MenuRFSDList(MenuList):
+    # Dateien auf der SD-Karte im Drucker (Modul rf_sdcard). Antippen kopiert
+    # die Datei auf den Raspberry Pi und startet den Druck (RF_SD_PRINT).
+    def __init__(self, manager, config, **kwargs):
+        super(MenuRFSDList, self).__init__(manager, config, **kwargs)
+        self._start_print = kwargs.get('start_print', True)
+        self._empty_text = kwargs.get('empty_text', 'No files')
+
+    def _populate(self):
+        super(MenuRFSDList, self)._populate()
+        card = self.manager.printer.lookup_object('rf_sdcard', None)
+        files = card.try_files() if card is not None else []
+        if not files:
+            def _back(el, context):
+                el.manager.back()
+            self.insert_item(self.manager.menuitem_from(
+                'command', name=repr(self._empty_text), gcode=_back))
+            return
+        for entry in files:
+            if self._start_print:
+                def _start(el, context, f=entry.path):
+                    el.manager.exit()
+                    return 'RF_SD_PRINT FILE="%s"' % (f,)
+                gcode = _start
+            else:
+                gcode = 'RF_SD_COPY FILE="%s"' % (entry.path,)
+            self.insert_item(self.manager.menuitem_from(
+                'command', name=repr(entry.path), gcode=gcode))
+
+
 menu_items = {
     'disabled': MenuDisabled,
     'command': MenuCommand,
     'input': MenuInput,
     'list': MenuList,
-    'vsdlist': MenuVSDList
+    'vsdlist': MenuVSDList,
+    'rfsdlist': MenuRFSDList
 }
 
 
