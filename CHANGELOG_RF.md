@@ -1,5 +1,10 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-08 (3): Display für den RF1000
+
+- **`config/rf_display_rf1000.cfg`:** Startseiten und Menü wie in der RF-Firmware für das 16x4-Display des RF1000 (Repetier `UI_COLS 16`, Kurztexte aus `uilang.h`, Zeichensatz `a00`).
+- **`config/rf_display.cfg`:** Kraftanzeige auf Seite 2 auch bei fünfstelligen Minuswerten in 20 Spalten.
+
 ## 2026-11-07 (5): Startbild 3D-Artmaker
 
 - **`rf_display.cfg`:** Startbild `rf_splash` mit 3D-Würfel aus eigenen Zeichen, Name, Version, Fortschrittsbalken und Stand, danach Seite 1. Version und Stand im Makro `_RF_INFO`.

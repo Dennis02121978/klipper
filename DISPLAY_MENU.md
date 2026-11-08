@@ -24,7 +24,15 @@ hd44780_charset: western
 
 `hd44780_charset: western` ist der Zeichensatz des RF2000-Displays (Repetier `UI_DISPLAY_CHARSET 2`), beim RF1000 `a00`. `menu_show_back: False` entfernt den Eintrag „..“ aus den Listen, zurück geht über die Zurück-Taste. Das Gradzeichen kommt wie in Repetier aus einem eigenen Zeichen (`~degrees~`), Mikrometer stehen als „um“.
 
-Die Seiten sind für 20 Spalten gebaut (Repetier-Vorlagen für `UI_COLS 20`). Am RF1000 mit 16 Spalten würden Zeilen abgeschnitten.
+Die Seiten sind für 20 Spalten gebaut (Repetier-Vorlagen für `UI_COLS 20`). Für den RF1000 mit 16x4-Display gibt es `config/rf_display_rf1000.cfg`: Seiten nach den Repetier-Vorlagen für `UI_COLS 16` und die kurzen Menütexte des RF1000 aus `uilang.h` (zum Beispiel „Schnelleinst.“, „Motoren aussch.“). Sie wird aus der RF2000-Datei erzeugt (`tools/make_rf1000_display.py` im Repo 3D-Artmaker). Unter `[display]` beim RF1000 dazu:
+
+```
+d6_pin: PL5
+d7_pin: PK4
+line_length: 16
+hd44780_charset: a00
+down_pin: !PE3
+```
 
 4. Klipper-Dienst neu starten: `sudo systemctl restart klipper`.
 
