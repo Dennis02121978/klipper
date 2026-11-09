@@ -1,5 +1,10 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-09: Objekt ausgeben bis Z 185, Startbild v1.5.7
+
+- `config/rf_display.cfg` und `config/rf_display_rf1000.cfg`: „Objekt ausgeben“ fährt das Bett nur noch bis Z max − 5 (185 mm) wie `PRINT_END`, vorne bis `position_max`.
+- Startbild zeigt v1.5.7, Stand 09.11.2026.
+
 ## 2026-11-08 (3): Display für den RF1000
 
 - **`config/rf_display_rf1000.cfg`:** Startseiten und Menü wie in der RF-Firmware für das 16x4-Display des RF1000 (Repetier `UI_COLS 16`, Kurztexte aus `uilang.h`, Zeichensatz `a00`).
