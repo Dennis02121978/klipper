@@ -1,6 +1,6 @@
 # BootScreen für den Raspberry Pi
 
-Der BootScreen zeigt beim Einschalten das 3D-Artmaker-Logo auf dem Display, bis KlipperScreen erscheint. Der Konsolentext ist dann nicht mehr zu sehen. Für die Installation brauchst du einmalig ein paar Befehle.
+Der BootScreen zeigt beim Einschalten das 3D-Artmaker-Logo auf dem Display, bis KlipperScreen erscheint. Das Logo wird dabei kurz animiert: Die Linie läuft einmal durch die 3D, danach wird der Schwung unter „Artmaker“ gezeichnet, und das Logo bleibt stehen. Der Konsolentext ist dann nicht mehr zu sehen. Für die Installation brauchst du einmalig ein paar Befehle.
 
 ## Passt das zu meinem Drucker?
 
@@ -29,15 +29,15 @@ Beim Tippen des Passworts siehst du nichts, das ist normal.
 
 ```bash
 cd ~
-wget https://github.com/Dennis02121978/3D-Artmaker/releases/download/v1.4.0/rf-bootlogo_1.4.0_all.deb
-echo "f2dbf736d959d7c37c317a485144a48bfc5b76077f2612ab2771aaad0da022c1  rf-bootlogo_1.4.0_all.deb" | sha256sum -c
+wget https://github.com/Dennis02121978/3D-Artmaker/releases/download/v1.7.0/rf-bootlogo_1.7.0_all.deb
+echo "e33f0345c20f3923f71cf5b0b9f1a89ac4caee8eac2e4fdb12382b902f2a1890  rf-bootlogo_1.7.0_all.deb" | sha256sum -c
 ```
 
 Am Ende muss `OK` stehen. Steht dort etwas anderes, installiere nicht weiter.
 
 ```bash
 sudo apt update
-sudo apt install ./rf-bootlogo_1.4.0_all.deb
+sudo apt install ./rf-bootlogo_1.7.0_all.deb
 ```
 
 Kommt eine Frage mit `J/n` oder `Y/n`, drücke `J` oder `Y` und dann Enter. Dein Drucker lädt dabei ImageMagick nach, das dauert einen Moment. Am Ende steht `Logo ist installiert`. Mainsail verliert dabei kurz die Verbindung, das ist normal.
@@ -55,7 +55,7 @@ Die Zeiten sind auf einem Raspberry Pi 3 gemessen:
 | Zeit nach dem Einschalten | Auf dem Display |
 |---|---|
 | bis etwa 13 Sekunden | Weiß, weil der Treiber noch nicht geladen ist |
-| ab etwa 13 Sekunden | Das Logo |
+| ab etwa 13 Sekunden | Das Logo, etwa zwei Sekunden animiert (Linie läuft durch die 3D, dann wird der Schwung gezeichnet), danach bleibt es stehen |
 | nach etwa 34 Sekunden | Für einen Moment schwarz, dann wieder das Logo |
 | ab etwa 41 Sekunden | KlipperScreen |
 
