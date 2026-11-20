@@ -1,5 +1,9 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-20 (2): Config Creator aus dem Repo entfernt
+
+- Der Config Creator gehört nicht ins Klipper-Repo und ist hier gelöscht. Er liegt auf [3d-artmaker.de/config-creator.php](https://3d-artmaker.de/config-creator.php).
+
 ## 2026-11-20: Offizielles Klipper v0.14.0
 
 - Klipper v0.14.0 eingemergt (10 Commits seit dem letzten Stand): Fehlerkorrekturen in `stepcompress`, `trdispatch`, `kin_extruder` und `bmi160`, `analog_in`-Berichte werten jetzt alle Messwerte aus.
@@ -68,9 +72,8 @@ in der `printer.cfg` eingetragen wird.
   bleibt erhalten, die Korrektur wird daraufmultipliziert. Befehl: `RF_FLOW_COMP`.
 - **Kurve "Digits"** in Mainsail: Neuer Sensortyp `rf1000_force` für `[temperature_sensor Digits]`.
   Mainsail zeigt die Einheit dort fest als "°C", gemeint ist die Kraft.
-- **Config Creator** (`RenkforceConfigCreator/index.html`): Seite im Browser, die `printer.cfg` und `macros.cfg` erzeugt, jetzt mit
-  Abschnitt für Notfall-Pause, Flow-Kompensation und Digits-Kurve sowie einer Anleitung zum Einstellen. Siehe
-  [RenkforceConfigCreator/README.md](RenkforceConfigCreator/README.md).
+- **Config Creator:** Seite im Browser, die `printer.cfg` und `macros.cfg` erzeugt, jetzt mit
+  Abschnitt für Notfall-Pause, Flow-Kompensation und Digits-Kurve sowie einer Anleitung zum Einstellen.
 - Beispiel-Konfigurationen `config/printer-rf1000.cfg` und `config/printer-rf2000v2-single.cfg`
   enthalten die neuen Abschnitte als auskommentierten Block.
 
