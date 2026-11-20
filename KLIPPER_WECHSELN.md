@@ -61,7 +61,7 @@ git remote -v
 git describe --tags --always
 ```
 
-In der ersten Zeile muss `Dennis02121978/klipper` stehen, die Version beginnt mit `v0.13.0`.
+In der ersten Zeile muss `Dennis02121978/klipper` stehen, die Version beginnt mit `v0.14.0`.
 
 ## Schritt 4: Firmware aufs Board schreiben
 
@@ -82,7 +82,7 @@ Deine `printer.cfg` bleibt beim Wechsel unverändert. Für neue Einstellungen ka
 ## Schritt 6: Vorsichtig testen
 
 1. Lade Mainsail mit **F5** neu und schau, ob Klipper bereit ist.
-2. Öffne **Maschine → Update Manager** und klicke auf **auf Aktualisierungen prüfen**. Bei `klipper` steht jetzt eine Version ab `v0.13.0`.
+2. Öffne **Maschine → Update Manager** und klicke auf **auf Aktualisierungen prüfen**. Bei `klipper` steht jetzt eine Version ab `v0.14.0`.
 3. Fahre mit `G28 X` und `G28 Y` X und Y an.
 4. Fahre mit `G28 Z` die Z-Achse an, die Hand am Not-Halt.
 5. Heize auf und mach einen kurzen Testdruck.

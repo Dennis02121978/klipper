@@ -1,5 +1,11 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-20: Offizielles Klipper v0.14.0
+
+- Klipper v0.14.0 eingemergt (10 Commits seit dem letzten Stand): Fehlerkorrekturen in `stepcompress`, `trdispatch`, `kin_extruder` und `bmi160`, `analog_in`-Berichte werten jetzt alle Messwerte aus.
+- Die RF-Module (Wägezelle über `ads1100`, Sense Offset, Notfall-Pause, Display) sind nicht betroffen, es gibt keine Konfliktstellen.
+- Die Version im Update Manager beginnt jetzt mit `v0.14.0`. Danach die Firmware mit dem Firmware Updater neu aufs Board schreiben.
+
 ## 2026-11-09: Objekt ausgeben bis Z 185, Startbild v1.5.7
 
 - `config/rf_display.cfg` und `config/rf_display_rf1000.cfg`: „Objekt ausgeben“ fährt das Bett nur noch bis Z max − 5 (185 mm) wie `PRINT_END`, vorne bis `position_max`.
@@ -75,7 +81,7 @@ Sense Offset (`[z_sense_offset]`) entspricht `FEATURE_SENSIBLE_PRESSURE` (`M3909
 
 ### Aktualisieren
 1. Im Mainsail unter **Maschine** "Nach Updates suchen" und Klipper aktualisieren. Der Update-Manager
-   meldet neue Commits des Forks, es gibt keine neue Versionsnummer, nur der Zähler (`v0.13.0-…`) steigt.
+   meldet neue Commits des Forks, es gibt keine neue Versionsnummer, nur der Zähler (`v0.14.0-…`) steigt.
 2. **Dienst neu starten:** `sudo systemctl restart klipper`. Ein `RESTART` im Mainsail lädt bereits
    geladene Python-Module nicht neu.
 3. Abschnitt `[rf1000_pressure_guard]` (und optional `[temperature_sensor Digits]`) in die `printer.cfg`
