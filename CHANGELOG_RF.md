@@ -1,5 +1,29 @@
 # Änderungen für RF1000 / RF2000
 
+## 2026-11-26: Z-Max-Endstop am RF2000 und RF2000 v2
+
+Der untere Endschalter der Z-Achse (Pin **PH1**, wie in der RF-Repetier-Firmware) wird jetzt ausgewertet. Das Bett fährt nicht weiter als bis zum Schalter. Der RF1000 hat diesen Schalter nicht.
+
+- **Neues Modul `rf_z_max.py`:** Ist der Schalter ausgelöst, fährt das Bett nicht weiter nach unten. Fahrten nach unten ab Z 150 (`guard_height`) laufen wie eine Referenzfahrt mit überwachtem Endstop: erst Z, dann X/Y/E auf der erreichten Höhe. Während eines Drucks bleiben Schritte bis 1 mm normale Fahrten. `FORCE_MOVE` wird nicht überwacht. `QUERY_ENDSTOPS` zeigt den Schalter als `z_max`.
+- **Neuer Befehl `RF_Z_MAX_SEEK`:** fährt bis zum Schalter, auch über `position_max` hinaus, höchstens bis `seek_limit` (Standard 210 mm, wie `Z210` bei Repetier).
+- **`safe_z_home.py`:** Behoben: Stand der Tisch beim Start schon ganz unten, ratterte der Motor beim Homing, weil `z_hop` blind weiter nach unten fuhr. Mit `[rf_z_max]` entfällt die Fahrt oder stoppt am Schalter.
+- **`z_jog.py`:** Auch die gehaltene Z-Taste stoppt am Schalter.
+- Ohne den Abschnitt `[rf_z_max]` verhält sich Klipper wie bisher. Die Firmware auf dem Board ändert sich dadurch nicht (kein Code in `src/`).
+
+**Einschalten:** zuerst Klipper aktualisieren und den Dienst neu starten (`FIRMWARE_RESTART` lädt den neuen Code nicht), dann in die `printer.cfg`:
+
+```ini
+[rf_z_max]
+pin: ^!PH1
+seek_limit: 210
+```
+
+Mit dem [3D-Artmaker Installer](https://github.com/Dennis02121978/3D-Artmaker) ab 1.7.7 erledigt das `3DArtmaker-upgrade`, und „Objekt ausgeben“ im Display-Menü fährt dann bis zum Schalter. Die aktuellen Configs liegen im Repo 3D-Artmaker, nicht in den älteren Beispieldateien unter `config/`. Anleitung: [Z-Max-Endstop](https://github.com/Dennis02121978/3D-Artmaker/blob/main/INSTALLATION.md#z-max-endstop-am-rf2000-und-rf2000-v2).
+
+> **Vor der ersten Fahrt testen:** `QUERY_ENDSTOPS` muss bei freiem Schalter `z_max:open` melden und bei gedrücktem `z_max:TRIGGERED`. Sonst `RF_Z_MAX_SEEK` und „Objekt ausgeben“ nicht benutzen.
+
+**Geprüft:** Klipper-Testlauf ohne Hardware mit beiden Configs (RF2000 und RF2000 v2) und Logiktest mit simuliertem Schalter. Auf beiden Druckern eingebaut. Echte Fahrten gegen den Schalter sind noch nicht getestet, beim RF2000 auch noch nicht das Auslösen des Schalters.
+
 ## 2026-11-20 (2): Config Creator aus dem Repo entfernt
 
 - Der Config Creator gehört nicht ins Klipper-Repo und ist hier gelöscht. Er liegt auf [3d-artmaker.de/config-creator.php](https://3d-artmaker.de/config-creator.php).
