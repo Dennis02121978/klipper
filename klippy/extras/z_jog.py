@@ -94,7 +94,16 @@ class ZJog:
             if target >= pos[2]:
                 return
         pos[2] = target
+        z_max = self.printer.lookup_object('rf_z_max', None)
         self.completion = self.reactor.completion()
+        if z_max is not None and direction > 0:
+            # Nach unten haelt zusaetzlich der Z-Max-Endstop die Fahrt an
+            try:
+                z_max.move_down(target, self.hold_speed, self.completion)
+            finally:
+                self.completion = None
+            self.printer.lookup_object('gcode_move').reset_last_position()
+            return
         try:
             toolhead.drip_move(pos, self.hold_speed, self.completion)
         finally:

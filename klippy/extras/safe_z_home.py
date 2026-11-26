@@ -27,6 +27,16 @@ class SafeZHoming:
             raise config.error("homing_override and safe_z_homing cannot"
                                +" be used simultaneously")
 
+    def _hop(self, toolhead):
+        z_max = self.printer.lookup_object('rf_z_max', None)
+        if z_max is None:
+            toolhead.manual_move([None, None, self.z_hop], self.z_hop_speed)
+            return
+        # RF2000: nicht weiter nach unten, wenn das Bett schon am
+        # Z-Max-Endstop steht
+        z_max.move_down(self.z_hop, self.z_hop_speed)
+        self.printer.lookup_object('gcode_move').reset_last_position()
+
     def cmd_G28(self, gcmd):
         toolhead = self.printer.lookup_object('toolhead')
 
@@ -41,13 +51,11 @@ class SafeZHoming:
                 # Always perform the z_hop if the Z axis is not homed
                 pos[2] = 0
                 toolhead.set_position(pos, homing_axes="z")
-                toolhead.manual_move([None, None, self.z_hop],
-                                     self.z_hop_speed)
+                self._hop(toolhead)
                 toolhead.get_kinematics().clear_homing_state("z")
             elif pos[2] < self.z_hop:
                 # If the Z axis is homed, and below z_hop, lift it to z_hop
-                toolhead.manual_move([None, None, self.z_hop],
-                                     self.z_hop_speed)
+                self._hop(toolhead)
 
         # Determine which axes we need to home
         need_x, need_y, need_z = [gcmd.get(axis, None) is not None
@@ -83,8 +91,7 @@ class SafeZHoming:
             if self.z_hop:
                 pos = toolhead.get_position()
                 if pos[2] < self.z_hop:
-                    toolhead.manual_move([None, None, self.z_hop],
-                                         self.z_hop_speed)
+                    self._hop(toolhead)
             # Move XY back to previous positions
             if self.move_to_previous:
                 toolhead.manual_move(prevpos[:2], self.speed)
