@@ -24,7 +24,7 @@ Mit dem [3D-Artmaker Installer](https://github.com/Dennis02121978/3D-Artmaker) a
 
 **Geprüft:** Klipper-Testlauf ohne Hardware mit beiden Configs und Logiktest mit simuliertem Schalter. Am Drucker: „Objekt ausgeben“ stoppt am Schalter (RF2000 v2 bei Z 184,11, RF2000 bei Z 189,72), und bei Bett unten wird die Fahrt nach unten beim Homing ausgelassen. Mit 3D-Artmaker 1.7.9 gibt es dafür auch den Makro-Knopf `OBJEKT_AUSGEBEN`.
 
-**Hinweis:** Während eines Drucks werden Schritte bis 1 mm nicht überwacht. Liegt der Schalter unter der Druckhöhe im Slicer, die Höhe dort kleiner einstellen.
+**Hinweis:** Während eines Drucks werden Schritte bis 1 mm nicht überwacht. Liegt der Schalter unter der Druckhöhe im Slicer, die Höhe dort kleiner einstellen. Seit 3D-Artmaker 1.7.10 hat der RF2000 v2 deshalb `position_max: 180` (Druckhöhe 175 mm).
 
 ## 2026-11-20 (2): Config Creator aus dem Repo entfernt
 
