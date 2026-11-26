@@ -22,7 +22,9 @@ Mit dem [3D-Artmaker Installer](https://github.com/Dennis02121978/3D-Artmaker) a
 
 > **Vor der ersten Fahrt testen:** `QUERY_ENDSTOPS` muss bei freiem Schalter `z_max:open` melden und bei gedrücktem `z_max:TRIGGERED`. Sonst `RF_Z_MAX_SEEK` und „Objekt ausgeben“ nicht benutzen.
 
-**Geprüft:** Klipper-Testlauf ohne Hardware mit beiden Configs (RF2000 und RF2000 v2) und Logiktest mit simuliertem Schalter. Auf beiden Druckern eingebaut. Echte Fahrten gegen den Schalter sind noch nicht getestet, beim RF2000 auch noch nicht das Auslösen des Schalters.
+**Geprüft:** Klipper-Testlauf ohne Hardware mit beiden Configs und Logiktest mit simuliertem Schalter. Am Drucker: „Objekt ausgeben“ stoppt am Schalter (RF2000 v2 bei Z 184,11, RF2000 bei Z 189,72), und bei Bett unten wird die Fahrt nach unten beim Homing ausgelassen. Mit 3D-Artmaker 1.7.9 gibt es dafür auch den Makro-Knopf `OBJEKT_AUSGEBEN`.
+
+**Hinweis:** Während eines Drucks werden Schritte bis 1 mm nicht überwacht. Liegt der Schalter unter der Druckhöhe im Slicer, die Höhe dort kleiner einstellen.
 
 ## 2026-11-20 (2): Config Creator aus dem Repo entfernt
 
